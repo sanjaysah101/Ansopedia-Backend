@@ -34,6 +34,10 @@ Config.connectDb();
 // API Routes
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/role", require("./routes/roleRouter"));
+app.use("/api/contents", require("./routes/contentsRoute"));
+app.use("/api/contact", require("./routes/contactRoute"));
+app.use("/api/notify", require("./routes/notifyRoute"));
+app.use("/api/leaders", require("./routes/leadersRouter"));
 
 // Non Api Routes
 app.use("/user", require("./routes/userRoutes"));

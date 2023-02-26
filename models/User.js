@@ -40,9 +40,8 @@ const userSchema = new mongoose.Schema({
     designation: { type: String, trim: true },
     roles: { type: Object },
     avatar: { type: String },
-    isAccountVerified: {
-        type: Boolean
-    },
+    isAccountVerified: {type: Boolean},
+    isProfileComplete: {type: Boolean, default : false},
     tokens: [{ type: Object }],
     otp: { type: Object },
     tc: { type: Boolean, required: true }

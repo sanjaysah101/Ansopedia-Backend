@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ansopedia - Email</title>
+    <title>Ansopedia - Contact</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="css/main.css">
 </head>
@@ -24,16 +24,10 @@
             </div>
             <div class="message">
                 <p>Hello, <span class="user">{{name}}</span> </p>
-                <p>Please confirm your email address to help us ensure your account is always protected.</p>
-                <p>To verify your email, please follow the link below:</p>
-                <div class="secret-code">
-                    <a href="{{link}}">Click Here</a>
-                    <br/><br/>
-                    <span>
-                        {{otp}}
-                    </span>
-                </div>
-                {{!-- <p class="light">Please ignore this email if you did not request a password change.</p> --}}
+                <p>You have contact us.</p>
+                <p>Your message is:</p>
+               
+                <p class="light">{{message}}.</p>
             </div>
             <div class="footer">
                 <div class="contact">

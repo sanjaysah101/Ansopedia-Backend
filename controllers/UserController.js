@@ -68,7 +68,7 @@ class UserController {
         }
     }
 
-    static verifyAccountByToken = async (req, res) => {
+    static verifyEmailByToken = async (req, res) => {
         const { id, token } = req.params;
         // console.log(token)
         try {
@@ -176,22 +176,23 @@ class UserController {
                     }
                     // console.log(isUpdated)
                 } else {
-                    isUpdated = false;
                     status_code = 422;
                     message = "Invalid name";
                     // console.log(message, status, status_code)
                 }
             }
+            // console.log("name + ", isUpdated)
             // if (email) updateUser = { ...updateUser, email };
             // console.log(updateUser.designation)
             if (designation) {
                 let tempDesignation = (updateUser.designation) ? (updateUser.designation).toLowerCase() : "";
-                console.log(tempDesignation)
-                if (tempDesignation !== designation.toLowerCase()) {
+                // console.log(tempDesignation)
+                if (tempDesignation.toLowerCase() !== designation.toLowerCase()) {
                     updateUser = { ...update._doc, designation }
                     isUpdated = true;
                 }
-            };
+            }
+            // console.log("designation + ", isUpdated)
             if (mobile) {
                 if (Utils.isAllNumber(mobile)) {
                     if ((updateUser.mobile) !== mobile) {
@@ -199,7 +200,15 @@ class UserController {
                         isUpdated = true;
                     }
                 }
-            };
+                else{
+                    isUpdated = false;
+                    status_code = 422;
+                    message = "Invalid number";
+                }
+                // console.log(mobile)
+            }
+            // console.log("mobile + ", isUpdated)
+            // console.log(updateUser)
             // if (username) {
             //     // console.log(username)
             //     if (updateUser.username) {
@@ -216,11 +225,16 @@ class UserController {
             //     updateUser = {...updateUser, }
             // }
             if (isUpdated) {
-                UserModel.findByIdAndUpdate(updateUser._id, updateUser).exec((err, info) => {
-                    if (err) errorHandler(err, req, res);
-                    res.status(200).json([{ "status": "success", "messages": "Updated successfully" }])
-                })
+                await UserModel.findByIdAndUpdate(updateUser._id, updateUser)
+                // .exec((err, info) => {
+                //     if (err) errorHandler(err, req, res);
+                //     else{
+                        await Helper.Update(updateUser._id);
+                //         // console.log(info);
+                //     }
+                // })
                 // res.send(updateUser)
+                        res.status(200).json([{ "status": "success", "messages": "Updated successfully" }])
             } else {
                 res.status(status_code).json([{ "status": "failed", message }])
             }
@@ -231,13 +245,83 @@ class UserController {
     }
 
     static UpdateAvatar = async (req, res) => {
-        try{
+        try {
             await UserModel.findByIdAndUpdate(req.user._id, {
                 $set: { avatar: req.filePath }
             })
+            await Helper.Update(req.user._id);
             res.status(200).json([{ "status": "sucess", "message": "file uploaded successfully" }])
-        }catch(err){
+        } catch (err) {
             if (err) Logs.errorHandler(err, req, res);
+        }
+    }
+
+    static changeUserPassword = async (req, res) => {
+        const { password, password_confirmation } = req.body;
+        if (password, password_confirmation) {
+            if (password !== password_confirmation) {
+                res.status(400).json([{ "status": "failed", "message": "New Password & confirm new password doesn't match" }])
+            } else {
+                const { isStrong, response } = Utils.checkPasswordValidation(password);
+                if(isStrong){
+                    const salt = await bcrypt.genSalt(10);
+                    const hashPassword = await bcrypt.hash(password, salt);
+                    await UserModel.findByIdAndUpdate(req.user._id, {
+                        $set: { password: hashPassword }
+                    });
+                    res.status(200).json([{ "status": "success", "message": "Password changed successfully" }]);
+                }else{
+                    res.status(400).json([{ "status": "failed", "message": response }]);
+                }
+            }
+        } else {
+            res.status(401).json([{ "status": "failed", "message": "All fields are required" }]);
+        }
+    }
+
+    static sendResetPasswordEmail = async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (email) {
+                if (Utils.ValidateEmail(email)) {
+                    const user = await UserModel.findOne({ email });
+                    if (user) {
+                        await Helper.ForgetPassword(user, req, res);
+
+                    } else {
+                        res.status(404).json([{ "status": "failed", "message": "User doesn't exists" }]);
+                    }
+                } else {
+                    res.status(422).json([{ "status": "failed", "message": "You have entered an invalid email address!" }]);
+                }
+            } else {
+                res.status(401).json([{ "status": "failed", "message": "Email is required" }]);
+            }
+        } catch (err) {
+            if (err) Logs.errorHandler(err, req, res);
+        }
+    }
+
+    static verifyOTP = async (req, res) => {
+        try {
+
+            const { email, otp } = req.body;
+            if (otp && email) {
+                try {
+                    const user = await UserModel.findOne({ email });
+                    if (user) {
+                        await Helper.VerifyOTP(user, otp, req, res);
+                    } else {
+                        res.status(404).json([{ "status": "failed", "message": "User doesn't exists" }]);
+                    }
+                } catch (err) {
+                    res.status(500).json([{ "status": "failed", "message": "something went wrong!!!" }])
+                }
+            } else {
+                res.status(401).json([{ "status": "failed", "message": "all field is required" }]);
+            }
+        } catch (err) {
+            if (err) throw new Error(`${err} at Helper.ForgetPassword`);
         }
     }
 }

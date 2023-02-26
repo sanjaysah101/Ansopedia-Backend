@@ -4,7 +4,7 @@ const { UserModel } = require("../models/User");
 const EMAIL_VERIFICATION_POINT = 400;
 const SET_USERNAME_POINT = 100;
 const UPDATE_AVATAR_POINT = 100;
-const COMPLETE_PROFILE_POINT = 300;
+const COMPLETE_PROFILE_POINT = 500;
 const REFER_POINT = 100;
 
 

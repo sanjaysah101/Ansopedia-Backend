@@ -8,14 +8,36 @@ const app = express();
 const { Config } = require("../config/Config");
 app.use(express.static(path.join(__dirname, "public")));
 const FROM_NOREPLY = process.env.EMAIL_FROM_NOREPLY;
+const FROM_CONTACT = process.env.EMAIL_FROM_CONTACT;
 
 class Mail {
-    static sendAccountVerification = async (email, name, otp, link) => {
-        let message = "Account Verification Email Sent... Please Check Your Email";
+    static sendAccountVerificationEmail = async (email, name, otp, link) => {
+        // let message = "Account Verification Email Sent... Please Check Your Email";
         const template = "accountVerification";
         let subject = "Ansopedia - Account Verification";
         const context = { otp, name, link }
         await sendMail(FROM_NOREPLY, email, subject, template, context);
+    }
+
+    static sendForgetPasswordEmail = async (email, name, otp) => {
+        // let message = "Forget Password Email Sent... Please Check Your Email";
+        const template = "forgetPassword";
+        let subject = "Ansopedia - Password Reset Link";
+        const context = { otp, name}
+        await sendMail(FROM_NOREPLY, email, subject, template, context);
+    }
+    static sendAccountVerificationConfirmationEmail = async (email, name) => {
+        // let message = "Account is Verified";
+        const template = "accountVerificationConfirmation";
+        let subject = "Ansopedia - Congratulation on Account Verification";
+        const context = {name}
+        await sendMail(FROM_NOREPLY, email, subject, template, context);
+    }
+    static sendContactResponseEmail = async (email, name, message) => {
+        const template = "contactResponse";
+        let subject = "Ansopedia - Message Recieved";
+        const context = { name, message}
+        await sendMail(FROM_CONTACT, email, subject, template, context);
     }
 }
 
@@ -41,7 +63,7 @@ const sendMail = async (from, to, subject, template, context) => {
             template: template, // the name of the template file i.e email.handlebars
             context: context
         }
-        // await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     } catch (err) {
         if (err) throw new Error(`${err} at Mail.sendMail`);
     }

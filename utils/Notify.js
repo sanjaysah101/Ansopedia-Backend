@@ -51,13 +51,10 @@ class Notify {
     }
     static completeProfile = async (user) => {
         try {
-
-            if (user.avatar) {
-                let earnedCoins = await Points.updateAvatar(user);
-                const title = `Profile Picture updated successfully!!!`;
-                const message = `You have earned ${earnedCoins} coins on updating your profile Picture.`
-                await saveNotififcation(user, title, message);
-            }
+            let earnedCoins = await Points.completeProfile(user);
+            const title = `Congratulation on completing your profile!!!`;
+            const message = `Hi <strong>${user.name}!!!</strong>. You have earned ${earnedCoins} coins on completing your profile.`
+            await saveNotififcation(user, title, message);
         } catch (err) {
             if (err) throw new Error(`${err} at Notify.AccountVerificationNotification`);
         }

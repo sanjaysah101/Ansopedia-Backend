@@ -68,36 +68,40 @@ class OTP {
         };
     }
     static matchOTP = async (user, OTP) => {
-        // console.log(user)
-        let isVerified = false, message = "OTP is not valid!!!", status_code = 401;
-        //Remove all expire OTP
-        let oldOTP = user?.otp?.sendOTP || [];
-        // console.log(oldOTP)
-        if (oldOTP.length) {
-            oldOTP = oldOTP.filter(otp => {
-                const timeDiff = (Date.now() - parseInt(otp.createdAt)) / 1000; //This will return remaining time in second
-                if (timeDiff < 900) return otp; // otp expire in 5 min
-            })
-        }
-        oldOTP.forEach(otp => {
-            if (otp.OTP === OTP) {
-                isVerified = true;
+        try{
+            // console.log(user)
+            let isVerified = false, message = "OTP is not valid!!!", status_code = 401;
+            //Remove all expire OTP
+            let oldOTP = user?.otp?.sendOTP || [];
+            // console.log(oldOTP)
+            if (oldOTP.length) {
+                oldOTP = oldOTP.filter(otp => {
+                    const timeDiff = (Date.now() - parseInt(otp.createdAt)) / 1000; //This will return remaining time in second
+                    if (timeDiff < 900) return otp; // otp expire in 5 min
+                })
             }
-        })
-        if (isVerified) {
-            let otpCount = user.otp?.otpCount || 0;
-
-            await UserModel.findByIdAndUpdate(user._id, {
-                otp: {
-                    sendOTP: [],
-                    otpCount: otpCount,
-                    createdAt: Date.now().toString()
+            oldOTP.forEach(otp => {
+                if (otp.OTP === OTP) {
+                    isVerified = true;
                 }
             })
-            status_code = 200;
-            message = "Verification Success!!!";
+            if (isVerified) {
+                let otpCount = user.otp?.otpCount || 0;
+    
+                await UserModel.findByIdAndUpdate(user._id, {
+                    otp: {
+                        sendOTP: [],
+                        otpCount: otpCount,
+                        createdAt: Date.now().toString()
+                    }
+                })
+                status_code = 200;
+                message = "Verification Success!!!";
+            }
+            return { isVerified, message, status_code };
+        }catch (err) {
+            if (err) throw new Error(`${err} at OTP.matchOTP`);
         }
-        return { isVerified, message, status_code };
     }
 
 }

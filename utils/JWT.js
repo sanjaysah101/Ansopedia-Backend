@@ -40,6 +40,29 @@ class JWT {
             if (err) throw new Error(`${err} at JWT.verifyToken`);
         }
     }
+    static verifyAuthToken = async (token) => {
+        const time = 86400; //1day
+        let message, isValid = false;
+        try {
+            // console.log(user._id);
+            const { userId } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+            const foundUser = await UserModel.findById(userId).select(["-password", "-__v", "-tc"]);
+            if (foundUser) {
+                await removeExpireToken(foundUser, time)
+                isValid = true;
+                // user = userId;
+                return {userId, isValid };
+            } else {
+                message = "User not found";
+                // return false;
+                return { isValid, message };
+            }
+        } catch (err) {
+            message = "invalid user"
+            // console.log(err.message)
+            return { message, user, isValid };
+        }
+    }
 }
 
 const updateToken = async (user, token, TOKEN_EXPIRY_TIME) => {
@@ -49,9 +72,10 @@ const updateToken = async (user, token, TOKEN_EXPIRY_TIME) => {
         if (oldTokens.length) {
             oldTokens = oldTokens.filter(token => {
                 const timeDiff = (Date.now() - parseInt(token.signedAt)) / 1000; //This will return remaining time in second
-                if (timeDiff < TOKEN_EXPIRY_TIME) return token; // Token expire in 15 minutes
+                if (timeDiff < TOKEN_EXPIRY_TIME) return token; // Token expire in 15 minutes i.e 900s
             })
         }
+        await removeExpireToken(user, TOKEN_EXPIRY_TIME);
         //update token field
         await UserModel.findByIdAndUpdate(user._id, {
             tokens: [...oldTokens, {
@@ -61,6 +85,24 @@ const updateToken = async (user, token, TOKEN_EXPIRY_TIME) => {
         })
     } catch (err) {
         if (err) throw new Error(`${err} at JWT.updateToken`);
+    }
+}
+const removeExpireToken = async (user, TOKEN_EXPIRY_TIME) => {
+    try {
+        //Remove all expire Token
+        let oldTokens = user.tokens || [];
+        if (oldTokens.length) {
+            oldTokens = oldTokens.filter(token => {
+                const timeDiff = (Date.now() - parseInt(token.signedAt)) / 1000; //This will return remaining time in second
+                if (timeDiff < TOKEN_EXPIRY_TIME) return token; // Token expire in 15 minutes i.e 900s
+            })
+        }
+        //update token field
+        await UserModel.findByIdAndUpdate(user._id, {
+            tokens: [...oldTokens]
+        })
+    } catch (err) {
+        if (err) throw new Error(`${err} at JWT.removeExpireToken`);
     }
 }
 module.exports = { JWT };
