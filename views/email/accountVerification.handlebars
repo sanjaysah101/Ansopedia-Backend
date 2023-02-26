@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansopedia - Email</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/email.css">
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        html {
+            font-size: 62.5%;
+        }
+
+        body {
+            font-size: 1.6rem;
+            background-color: #f6f6f6;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 126, 54, 0.05);
+        }
+
+        .logo {
+            display: flex;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            height: 16rem;
+        }
+
+        .logo img {
+            width: 25rem;
+        }
+
+        .template-body .header {
+            background-color: #272727;
+            color: #fff;
+            display: flex;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            height: 16rem;
+            flex-direction: column;
+        }
+
+        .template-body .header .icon {
+            display: flex;
+            margin: 1rem 0;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            float: right;
+        }
+
+        .template-body .header .icon img {
+            height: 6rem;
+        }
+
+        .template-body .header p {
+            font-size: 2.4rem;
+        }
+
+        .template-body .message {
+            color: #615b5b;
+            padding: 2rem;
+        }
+
+        .template-body .message p {
+            margin: 1.5rem 0;
+        }
+
+        .template-body .message .user {
+            font-size: 2.4rem;
+            font-weight: 500;
+        }
+
+        .template-body .message .secret-code {
+            text-align: center;
+        }
+
+        .template-body .message .secret-code span {
+            display: inline-block;
+            color: #fff;
+            background-color: #272727;
+            padding: 1rem 2rem;
+            font-weight: 500;
+        }
+
+        .template-body .message .light {
+            font-style: italic;
+            color: #827878;
+        }
+
+        .template-body .footer {
+            background-color: #272727;
+            color: #fff;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+        }
+
+        .template-body .footer .contact {
+            margin-right: 1.6rem;
+            padding-right: 1.6rem;
+            border-right: 1px solid #fff;
+        }
+
+        .template-body .footer .contact span {
+            text-transform: uppercase;
+        }
+
+        .template-body .footer .contact .info {
+            margin: 0.5rem;
+        }
+
+        .template-body .footer .contact .info div {
+            display: flex;
+            align-items: center;
+        }
+
+        .template-body .footer .contact .info div i {
+            margin-right: 5px;
+        }
+
+        .template-body .footer .contact .info div a {
+            word-wrap: break-word;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .template-body .footer .social-share .icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .template-body .footer .social-share .icons a {
+            margin: 1rem;
+        }
+
+        .template-body .footer .social-share .icons a img {
+            width: 3.2rem;
+        }
+
+        @media screen and (max-width: 480px) {
+            .template-body .footer {
+                flex-direction: column;
+                justify-content: flex-start;
+            }
+
+            .template-body .footer .contact {
+                border-right: none;
+                border-bottom: 1px solid #fff;
+                margin: 1.6rem 0;
+                padding-bottom: 1.6rem;
+            }
+        }
+
+        /*# sourceMappingURL=main.css.map */
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="images/ansopedia_logo.png" alt="Ansopedia">
+        </div>
+        <div class="template-body">
+            <div class="header">
+                <div class="icon">
+                    <img src="images/unlock_light.png" alt="Unlock">
+                </div>
+                <p>Please Enter The OTP</p>
+            </div>
+            <div class="message">
+                <p>Hello, <span class="user">{{name}}</span> </p>
+                {{!-- <p>{{message}} </p> --}}
+                <p>We have sent you this email in response to your request to reset your password on Ansopedia.</p>
+                <p>To reset your password, please follow the otp below:</p>
+                <div class="secret-code">
+                    <a href="{{link}}">Click Here</a>
+                    <br/><br/>
+                    <span>
+                        {{otp}}
+                        {{!-- Your OTP --}}
+                    </span>
+                </div>
+                <p class="light">Please ignore this email if you did not request a password change.</p>
+            </div>
+            <div class="footer">
+                <div class="contact">
+                    <span>Contact</span>
+                    <div class="info">
+                        <div><i class="material-icons" style="font-size:16px;">location_on</i>
+                            <address>Rajkot, Gujarat, India - 360020</address>
+                        </div>
+                        <div><i class="material-icons" style="font-size:16px;">language</i>
+                            <p><a href="ansopedia.com">Ansopedia.com</a></p>
+                        </div>
+                        <div><i class="material-icons" style="font-size:16px;">email</i><a
+                                href="mailto:contact@ansopedia.com">contact@ansopedia.com</a></div>
+                    </div>
+                </div>
+                <div class="social-share">
+                    <div class="icons">
+                        <a href="https://www.facebook.com/AnsopediaGroup" title="Facebook" target="_blank">
+                            <img src="images/facebook_light.png" alt="fb">
+                        </a>
+                        <a href="https://twitter.com/AnsopediaGroup" title="Facebook" target="_blank">
+                            <img src="images/twitter_light.png" alt="t">
+                        </a>
+                        <a href="https://www.instagram.com/ansopedia/" title="Facebook" target="_blank">
+                            <img src="images/instagram_light.png" alt="In">
+                        </a>
+                    </div>
+                    <p>Company © All Rights Reserved</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
