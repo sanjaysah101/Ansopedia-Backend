@@ -37,7 +37,8 @@ class JWT {
             }
             return false;
         } catch (err) {
-            if (err) throw new Error(`${err} at JWT.verifyToken`);
+            return false;
+            // if (err) throw new Error(`${err} at JWT.verifyToken`);
         }
     }
     static verifyAuthToken = async (token) => {

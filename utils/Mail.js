@@ -63,7 +63,7 @@ const sendMail = async (from, to, subject, template, context) => {
             template: template, // the name of the template file i.e email.handlebars
             context: context
         }
-        await transporter.sendMail(mailOptions);
+        // await transporter.sendMail(mailOptions);
     } catch (err) {
         if (err) throw new Error(`${err} at Mail.sendMail`);
     }

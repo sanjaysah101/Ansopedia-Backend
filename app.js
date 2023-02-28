@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path")
 const expressUpload = require("express-fileupload");
-
+const { UserController } = require("./controllers/UserController");
 const { Logs } = require("./middlewares/Logs");
 const { Config } = require("./config/Config");
 
@@ -22,7 +22,7 @@ app.use(expressUpload());
 
 // To use HBS
 app.set('view engine', 'hbs')
-app.use(express.static(path.join(__dirname, "public")));
+// app.use(express.static(path.join(__dirname, "..","public")));
 
 //CORS Policy - Enble for every device
 app.use(cors(Config.corsOptions))
@@ -39,8 +39,9 @@ app.use("/api/contact", require("./routes/contactRoute"));
 app.use("/api/notify", require("./routes/notifyRoute"));
 app.use("/api/leaders", require("./routes/leadersRouter"));
 
+
 // Non Api Routes
-app.use("/user", require("./routes/userRoutes"));
+app.use("/", require("./routes/NonApiRoute"));
 
 // Handling non matching request from the client
 app.all("*", (req, res) => {

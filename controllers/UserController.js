@@ -6,6 +6,8 @@ const { Logs } = require("../middlewares/Logs");
 const { RoleModel } = require("../models/Roles");
 const { Helper } = require("../utils/Helper");
 
+const IMAGE_URI = "https://api.ansopedia.com/images/"
+
 class UserController {
     static registration = async (req, res) => {
         let message, isRegistered = false, statusCode, status = "failed";
@@ -24,9 +26,9 @@ class UserController {
                                 } else {
                                     const hashPassword = await Utils.hashPassword(password);
                                     // const userRole = await roleModel.findOne({ "title": "superadmin" }).select("_id");
-                                    const superadmin = await RoleModel.findOne({ "title": "superadmin" }).select("_id");
+                                    const user = await RoleModel.findOne({ "title": "user" }).select("_id");
                                     const username = email.split("@")[0];
-                                    const newUser = new UserModel({ name, email, "roles": { superadmin }, password: hashPassword, isAccountVerified: false, tc, username });
+                                    const newUser = new UserModel({ name, email, "roles": { user }, password: hashPassword, isAccountVerified: false, tc, username });
                                     await newUser.save();
                                     await Helper.Registration(email);
                                     isRegistered = true;
@@ -73,18 +75,22 @@ class UserController {
         // console.log(token)
         try {
             const user = await UserModel.findById(id);
-            if (user.isAccountVerified) {
-                res.render('congratulation', {
-                    name: user.name,
-                    message: "Your account is already verified"
-                });
-            } else {
-                if (Helper.EmailVerificationByToken(user, token)) {
+            if(user){
+                if (user.isAccountVerified) {
                     res.render('congratulation', {
                         name: user.name,
-                        message: "Congratulation on Account Verification"
+                        message: "Your account is already verified"
                     });
+                } else {
+                    if (Helper.EmailVerificationByToken(user, token, req, res)) {
+                        res.render('congratulation', {
+                            name: user.name,
+                            message: "Congratulation on Account Verification"
+                        });
+                    }
                 }
+            }else{
+                res.status(404).json([{ "status": "failed", "message": "Account does't exist" }]);
             }
         } catch (err) {
             Logs.errorHandler(err, req, res);
@@ -130,7 +136,7 @@ class UserController {
             const UserRoles = [];
             for (let r in roles) UserRoles.push(r);
             res.status(200).json([{
-                _id, name, email, username, UserRoles, avatar, isAccountVerified, mobile, designation, socialProfiles, "coins": coins.totalCoins
+                _id, name, email, username, UserRoles, "avatar": IMAGE_URI+avatar, isAccountVerified, mobile, designation, socialProfiles, "coins": coins.totalCoins
             }]);
         } catch (err) {
             if (err) Logs.errorHandler(err, req, res);
@@ -165,76 +171,41 @@ class UserController {
     static updateUser = async (req, res) => {
         try {
             const { name, designation, mobile, socialProfiles, username } = req.body;
-            const update = { ...req.user };
-            let updateUser = { ...update._doc }
             let status_code = 304, message = "nothing to update", isUpdated = false;
             if (name) {
                 if (Utils.isAllLetter(name)) {
-                    if ((updateUser.name).toLowerCase() !== name.toLowerCase()) {
-                        updateUser = { ...update._doc, name }
+                    if ((req.user.name).toLowerCase() !== name.toLowerCase()) {
+                        await UserModel.findByIdAndUpdate(req.user._id, {name})
                         isUpdated = true;
                     }
-                    // console.log(isUpdated)
                 } else {
                     status_code = 422;
                     message = "Invalid name";
-                    // console.log(message, status, status_code)
                 }
             }
-            // console.log("name + ", isUpdated)
-            // if (email) updateUser = { ...updateUser, email };
-            // console.log(updateUser.designation)
             if (designation) {
-                let tempDesignation = (updateUser.designation) ? (updateUser.designation).toLowerCase() : "";
-                // console.log(tempDesignation)
+                let tempDesignation = (req.user.designation) ? (req.user.designation).toLowerCase() : "";
                 if (tempDesignation.toLowerCase() !== designation.toLowerCase()) {
-                    updateUser = { ...update._doc, designation }
+                    await UserModel.findByIdAndUpdate(req.user._id, {designation});
                     isUpdated = true;
                 }
             }
-            // console.log("designation + ", isUpdated)
             if (mobile) {
                 if (Utils.isAllNumber(mobile)) {
-                    if ((updateUser.mobile) !== mobile) {
-                        updateUser = { ...update._doc, mobile }
+                    if ((req.user.mobile) !== mobile) {
+                        await UserModel.findByIdAndUpdate(req.user._id, { mobile })
                         isUpdated = true;
                     }
                 }
-                else{
+                else {
                     isUpdated = false;
                     status_code = 422;
                     message = "Invalid number";
                 }
-                // console.log(mobile)
             }
-            // console.log("mobile + ", isUpdated)
-            // console.log(updateUser)
-            // if (username) {
-            //     // console.log(username)
-            //     if (updateUser.username) {
-            //         // console.log(updateUser.username)
-            //     } else {
-            //         updateUser = { ...update._doc, username }
-            //         isUpdated = true;
-            //         await Notification.username(updateUser);
-            //     }
-            // }
-
-            // if(socialProfiles) {
-            //     console.log(socialProfiles)
-            //     updateUser = {...updateUser, }
-            // }
             if (isUpdated) {
-                await UserModel.findByIdAndUpdate(updateUser._id, updateUser)
-                // .exec((err, info) => {
-                //     if (err) errorHandler(err, req, res);
-                //     else{
-                        await Helper.Update(updateUser._id);
-                //         // console.log(info);
-                //     }
-                // })
-                // res.send(updateUser)
-                        res.status(200).json([{ "status": "success", "messages": "Updated successfully" }])
+                await Helper.Update(req.user._id);
+                res.status(200).json([{ "status": "success", "messages": "Updated successfully" }])
             } else {
                 res.status(status_code).json([{ "status": "failed", message }])
             }
@@ -257,20 +228,27 @@ class UserController {
     }
 
     static changeUserPassword = async (req, res) => {
-        const { password, password_confirmation } = req.body;
-        if (password, password_confirmation) {
+        const { email, password, password_confirmation } = req.body;
+        console.log(email, password, password_confirmation)
+        if (email && password && password_confirmation) {
             if (password !== password_confirmation) {
                 res.status(400).json([{ "status": "failed", "message": "New Password & confirm new password doesn't match" }])
             } else {
                 const { isStrong, response } = Utils.checkPasswordValidation(password);
-                if(isStrong){
+                if (isStrong) {
                     const salt = await bcrypt.genSalt(10);
                     const hashPassword = await bcrypt.hash(password, salt);
-                    await UserModel.findByIdAndUpdate(req.user._id, {
-                        $set: { password: hashPassword }
-                    });
-                    res.status(200).json([{ "status": "success", "message": "Password changed successfully" }]);
-                }else{
+                    const user = await UserModel.findOne({email});
+                    if(user){
+                        // console.log(user._id);
+                        await UserModel.findByIdAndUpdate(user._id, {
+                            $set: { password: hashPassword }
+                        });
+                        res.status(200).json([{ "status": "success", "message": "Password changed successfully" }]);
+                    }else{
+                        res.status(404).json([{ "status": "failed", "message": "User doesn't exists" }]);
+                    }
+                } else {
                     res.status(400).json([{ "status": "failed", "message": response }]);
                 }
             }

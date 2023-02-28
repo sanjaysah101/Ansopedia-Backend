@@ -10,7 +10,7 @@ class Helper {
             // console.log(email)
             const user = await UserModel.findOne({ email });
             const token = await JWT.generateToken(user, "15m", 900);
-            const link = `http://localhost:8000/user/verify/${user._id}/${token}`;
+            const link = `https://api.ansopedia.com/user/verify/${user._id}/${token}`;
             console.log(link);
             let otp = OTP.generateOTP();
             await OTP.saveOTP(user, otp);
@@ -20,7 +20,7 @@ class Helper {
             if (err) throw new Error(`${err} at Helper.Registration`);
         }
     }
-    static EmailVerificationByToken = async (user, token) => {
+    static EmailVerificationByToken = async (user, token, req, res) => {
         try {
             const isValid = await JWT.verifyToken(user, token, 900);
             if (isValid) {
@@ -38,11 +38,14 @@ class Helper {
                     res.status(403).json({ "status": "Forbidden", "message": "session expire" });
                 }
             } else {
-                res.status(401).json({ "status": "failed", "message": "authorization failed" });
+                await UserModel.findByIdAndDelete(user._id);
+                res.status(401).json({ "status": "failed", "message": "link expired" });
             }
             return false;
         } catch (err) {
-            if (err) throw new Error(`${err} at Helper.EmailVerificationByToken`);
+            console.log(err.message)
+            return false;
+            // if (err) throw new Error(`${err} at Helper.EmailVerificationByToken`);
         }
 
     }

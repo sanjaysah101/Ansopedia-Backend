@@ -1,6 +1,8 @@
 const path = require("path")
 const MAXSIZE = 1000000;
 const express = require("express");
+const { AssetsModel } = require("../models/Assets");
+const IMAGE_URI = "https://api.ansopedia.com/images/";
 
 const checkExtension = (file) => {
     const extension = path.extname(file.name).toLowerCase();
@@ -52,6 +54,46 @@ class Assets {
         }
 
     }
+
+
+    static fileUpload = (req, res, next) => {
+        const file = req.files;
+        // console.log(file)
+        if (file) {
+            if (!file.image) {
+                res.status(400).json([{ "status": "failed", "message": "field name must be image" }]);
+            } else {
+                if (!checkExtension(file.image)) {
+                    res.status(400).json([{ "status": "failed", "message": "Invalid Extension!!! Only .png, .jpg, .jpeg format is required" }]);
+                } else {
+                    if (file.image.size < MAXSIZE) {
+                        // const extension = path.extname(file.image.name).toLowerCase();
+                        let filename = `${Date.now()}-${file.image.name}`;
+                        console.log(filename);
+                        const LOC = path.join(__dirname, "..", "assets", "images", filename);
+                        file.image.mv(`${LOC}`, async err => {
+                            if (err) {
+                                res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                            } else {
+                                const asset = new AssetsModel({ title: filename });
+                                asset.save();
+                                res.status(200).json([{ "status": "sucess", "message": "file uploaded successfully" }])
+                            }
+                        });
+                    } else {
+                        res.status(400).json([{ "status": "failed", "message": "avatar size is to large", "maxSize": MAXSIZE }]);
+                    }
+                }
+                // console.log(extension)
+            }
+
+        } else {
+            res.status(404).json([{ "status": "failed", "message": "image is missing" }]);
+        }
+
+    }
+
+
     static getFile = (req, res) => {
         let filename = req.user.avatar;
         if (filename) {
@@ -63,6 +105,55 @@ class Assets {
         } else {
             console.log(filename)
             res.status(404).json([{ "status": "failed", "message": "avatar not found" }]);
+        }
+    }
+    // static getAvatar = (req, res) => {
+    //     const { avatar } = req.params;
+    //     console.log(avatar);
+    //     // res.send(imageURI)
+    //     // let filename = req.user.avatar;
+    //     if (avatar) {
+    //         const LOC = path.join("assets", "avatar", avatar)
+    //         res.download(LOC, function (error) {
+    //             if (error)
+    //                 res.status(404).json([{ "status": "failed", "message": "avatar not found" }]);
+    //         })
+    //     } else {
+    //         console.log(avatar)
+    //         res.status(404).json([{ "status": "failed", "message": "avatar not found" }]);
+    //     }
+    // }
+    static getImage = async (req, res) => {
+        const { imageURI } = req.params;
+        // console.log(imageURI);
+        // res.send(imageURI)
+        // let filename = req.user.avatar;
+        if (imageURI) {
+            const LOC = path.join("assets", "avatar", imageURI);
+            res.download(LOC, (error) => {
+                if (error) {
+                    const NEW_LOC = path.join("assets", "images", imageURI);
+                    res.download(NEW_LOC, function (err) {
+                        if (err) {
+                            res.status(404).json([{ "status": "failed", "message": "image not found" }])
+                        }
+
+                    });
+                }
+            })
+        }else{
+            const imageList = await AssetsModel.find().select(["-_id","title"]);
+            if(imageList.length > 0)
+            {
+                const newImageList = [];
+                for (let i of imageList){
+                    newImageList.push({"title":IMAGE_URI+i.title})
+                    // console.log(i.title)
+                }
+                res.json(newImageList);
+            }else{
+                res.status(404).json([{ "status": "failed", "message": "Nothing to show" }])
+            }
         }
     }
 }
