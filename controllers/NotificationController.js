@@ -35,7 +35,8 @@ class NotificationController {
         try {
             const notifications = await NotificationModel.find().select(["_id", "title", "message", "time", "scope"]);
             let GlobalNotifications = notifications.filter(f => f.scope === "global")
-            const userNotification = await UserModel.findById(req.user._id).select("notifications").populate({
+            const user = await UserModel.findOne({ uid: req.firebaseUser.uid });
+            const userNotification = await UserModel.findById(user._id).select("notifications").populate({
                 path: "notifications",
                 select: ["_id", "title", "message", "time"]
             });

@@ -5,7 +5,7 @@ dotenv.config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const DB_Name = process.env.DATABASE_NAME;
-const whitelist = ["https://www.ansopedia.com"];
+const whitelist = ["http://localhost:3000", "http://127.0.0.1:3000"];
 
 mongoose.set('strictQuery', true);
 class Config {
@@ -32,7 +32,7 @@ class Config {
     });
 
     static corsOptions = {
-        origin: function (origin, callback) {
+        origin: function (origin, callback) { 
             // db.loadOrigins is an example call to load
             // a list of origins from a backing database
             if (whitelist.indexOf(origin) !== -1 || !origin) {

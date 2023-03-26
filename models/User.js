@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
+    uid: {
+        type: String,
+        required: true,
+        trim: true,
+        unique: true
+    },
     name: {
         type: String,
         required: true,
@@ -38,7 +44,9 @@ const userSchema = new mongoose.Schema({
         { type: mongoose.Schema.Types.ObjectId, ref: "notifications" }
     ],
     designation: { type: String, trim: true },
-    roles: { type: Object },
+    roles: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "roles" }
+    ],
     avatar: { type: String },
     isAccountVerified: {type: Boolean},
     isProfileComplete: {type: Boolean, default : false},

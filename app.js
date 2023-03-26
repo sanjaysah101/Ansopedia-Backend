@@ -1,10 +1,8 @@
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path")
 const expressUpload = require("express-fileupload");
-const { UserController } = require("./controllers/UserController");
 const { Logs } = require("./middlewares/Logs");
 const { Config } = require("./config/Config");
 
@@ -31,13 +29,22 @@ app.use(cors(Config.corsOptions))
 Config.connectDb();
 
 
+
+// const firebaseAdminAuth = new FirebaseAdminApp()
+
+
+require("./config/Firebase");
+ // console.log(FirebaseApp().auth())
+
+
 // API Routes
-app.use("/api/user", require("./routes/userRoutes"));
+// app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/role", require("./routes/roleRouter"));
 app.use("/api/contents", require("./routes/contentsRoute"));
 app.use("/api/contact", require("./routes/contactRoute"));
 app.use("/api/notify", require("./routes/notifyRoute"));
 app.use("/api/leaders", require("./routes/leadersRouter"));
+app.use("/api/user", require("./routes/AuthRoute"));
 
 
 // Non Api Routes

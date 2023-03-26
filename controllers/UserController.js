@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 
 const { UserModel } = require("../models/User.js");
-const { Utils } = require("../utils/Utils")
+const { Utils } = require("../utils/Utils");
 const { Logs } = require("../middlewares/Logs");
 const { RoleModel } = require("../models/Roles");
 const { Helper } = require("../utils/Helper");
@@ -15,38 +15,43 @@ class UserController {
         if (name && email && password && password_confirmation && tc) {
             if (Utils.ValidateEmail(email)) {
                 if (Utils.isAllLetter(name)) {
-                    if (password === password_confirmation) {
-                        const { isStrong, response } = Utils.checkPasswordValidation(password);
-                        if (isStrong) {
-                            try {
-                                const isUserExist = await UserModel.findOne({ email });
-                                if (isUserExist) {
-                                    statusCode = 403;
-                                    message = "Email already exists";
-                                } else {
-                                    const hashPassword = await Utils.hashPassword(password);
-                                    // const userRole = await roleModel.findOne({ "title": "superadmin" }).select("_id");
-                                    const user = await RoleModel.findOne({ "title": "user" }).select("_id");
-                                    const username = email.split("@")[0];
-                                    const newUser = new UserModel({ name, email, "roles": { user }, password: hashPassword, isAccountVerified: false, tc, username });
-                                    await newUser.save();
-                                    await Helper.Registration(email);
-                                    isRegistered = true;
+                    if(name.length > 2){
+                        if (password === password_confirmation) {
+                            const { isStrong, response } = Utils.checkPasswordValidation(password);
+                            if (isStrong) {
+                                try {
+                                    const isUserExist = await UserModel.findOne({ email });
+                                    if (isUserExist) {
+                                        statusCode = 403;
+                                        message = "Email already exists";
+                                    } else {
+                                        const hashPassword = await Utils.hashPassword(password);
+                                        // const userRole = await roleModel.findOne({ "title": "superadmin" }).select("_id");
+                                        const user = await RoleModel.findOne({ "title": "user" }).select("_id");
+                                        const username = email.split("@")[0];
+                                        const newUser = new UserModel({ name, email, "roles": { user }, password: hashPassword, isAccountVerified: false, tc, username });
+                                        await newUser.save();
+                                        await Helper.Registration(email);
+                                        isRegistered = true;
+                                    }
+                                } catch (err) {
+                                    if (err) {
+                                        Logs.errorHandler(err, req, res);
+                                        statusCode = 500;
+                                        message = "something went wrong";
+                                    }
                                 }
-                            } catch (err) {
-                                if (err) {
-                                    Logs.errorHandler(err, req, res);
-                                    statusCode = 500;
-                                    message = "something went wrong";
-                                }
+                            } else {
+                                statusCode = 400;
+                                message = response
                             }
                         } else {
                             statusCode = 400;
-                            message = response
+                            message = "password & confirm password doesn't match";
                         }
-                    } else {
-                        statusCode = 400;
-                        message = "password & confirm password doesn't match";
+                    }else{
+                        statusCode = 422;
+                        message = "Name must be greater than 2 letter";
                     }
                 } else {
                     statusCode = 422;

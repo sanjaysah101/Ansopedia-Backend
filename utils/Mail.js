@@ -1,5 +1,4 @@
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const hbs = require('nodemailer-express-handlebars');
 const path = require("path");
 const express = require("express")
@@ -43,7 +42,8 @@ class Mail {
 
 const sendMail = async (from, to, subject, template, context) => {
     try {
-        const transporter = Config.nodemailerTransport(from);
+        const transporter = await 
+        Config.nodemailerTransport(from);
         // point to the template folder
         const handlebarOptions = {
             viewEngine: {
@@ -63,7 +63,7 @@ const sendMail = async (from, to, subject, template, context) => {
             template: template, // the name of the template file i.e email.handlebars
             context: context
         }
-        // await transporter.sendMail(mailOptions);
+        await transporter.sendMail(mailOptions);
     } catch (err) {
         if (err) throw new Error(`${err} at Mail.sendMail`);
     }

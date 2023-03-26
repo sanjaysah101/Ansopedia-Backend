@@ -27,6 +27,7 @@ class Auth {
 const auth = async (req, res, next) => {
     try {
         const { authorization } = req.headers;
+        console.log(authorization)
         if (authorization && authorization.startsWith("Bearer")) {
             const token = authorization.split(' ')[1];
             const { message, userId, isValid } = await JWT.verifyAuthToken(token);

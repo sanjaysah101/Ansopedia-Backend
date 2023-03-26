@@ -72,6 +72,9 @@ class Utils {
         const salt = await bcrypt.genSalt(10);
         return await bcrypt.hash(password, salt);
     }
+    static matchPassword = async (newPassword, password) => {
+        return await bcrypt.compare(newPassword, password);
+    }
 
    
 }

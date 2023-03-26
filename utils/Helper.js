@@ -11,7 +11,7 @@ class Helper {
             const user = await UserModel.findOne({ email });
             const token = await JWT.generateToken(user, "15m", 900);
             const link = `https://api.ansopedia.com/user/verify/${user._id}/${token}`;
-            console.log(link);
+            // console.log(link);
             let otp = OTP.generateOTP();
             await OTP.saveOTP(user, otp);
             // console.log(user);
@@ -49,6 +49,12 @@ class Helper {
         }
 
     }
+    static VerifyEmailByFirebase = async (user) => {
+        await Notify.registration(user);
+        await Notify.emailVerification(user);
+        await Mail.sendAccountVerificationConfirmationEmail(user.email, user.name);
+        return true;
+    }
     static Login = async (user) => {
         try {
             const token = await JWT.generateLoginToken(user, "1d", 86400);
@@ -85,7 +91,7 @@ class Helper {
         try {
             const { isVerified, message, status_code } = await OTP.matchOTP(user, otp);
             if (isVerified) {
-                res.status(status_code).json([{ "status": "success", message}])
+                res.status(status_code).json([{ "status": "success", message }])
             } else {
                 res.status(status_code).json([{ "status": "failed", message }])
             }
@@ -96,15 +102,14 @@ class Helper {
 
     static Update = async (id) => {
         const user = await UserModel.findById(id);
-        if(!user.isProfileComplete){
-            if(user.mobile && user.designation && user.avatar && user.isAccountVerified){
+        if (!user.isProfileComplete) {
+            if (user.mobile && user.designation && user.avatar && user.isAccountVerified) {
                 await UserModel.findByIdAndUpdate(id, {
-                    $set : {isProfileComplete : true}
+                    $set: { isProfileComplete: true }
                 });
                 Notify.completeProfile(user);
                 console.log(user.mobile, user.designation, user.avatar, user.isAccountVerified);
             }
-            
         }
     }
 }

@@ -3,6 +3,7 @@ const MAXSIZE = 1000000;
 const express = require("express");
 const { AssetsModel } = require("../models/Assets");
 const IMAGE_URI = "https://api.ansopedia.com/images/";
+const { unlink, existsSync } = require("fs")
 
 const checkExtension = (file) => {
     const extension = path.extname(file.name).toLowerCase();
@@ -33,8 +34,15 @@ class Assets {
                     if (file.avatar.size < MAXSIZE) {
                         let filename = `${req.user.email.split("@")[0]}-${Date.now()}-${file.avatar.name}`;
                         // path.join(__dirname, "..", "logs")
-                        const LOC = path.join(__dirname, "..", "assets", "avatar", filename)
+                        const fileToUpload = path.join(__dirname, "..", "assets", "avatar");
+                        const LOC = path.join(fileToUpload, filename)
                         req.filePath = filename;
+                        const unlinkFile = path.join(fileToUpload, req.user.avatar);
+                        if(existsSync(unlinkFile)){
+                            unlink(unlinkFile, (err) => {
+                                if (err) res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                            });
+                        }
                         file.avatar.mv(`${LOC}`, err => {
                             if (err) {
                                 res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
@@ -42,6 +50,13 @@ class Assets {
                                 next()
                             }
                         });
+
+                        // res.end()
+
+
+
+
+
                     } else {
                         res.status(400).json([{ "status": "failed", "message": "avatar size is to large", "maxSize": MAXSIZE }]);
                     }
@@ -95,6 +110,7 @@ class Assets {
 
 
     static getFile = (req, res) => {
+        console.log(req.user.avatar)
         let filename = req.user.avatar;
         if (filename) {
             const LOC = path.join("assets", "avatar", filename)
@@ -141,17 +157,16 @@ class Assets {
                     });
                 }
             })
-        }else{
-            const imageList = await AssetsModel.find().select(["-_id","title"]);
-            if(imageList.length > 0)
-            {
+        } else {
+            const imageList = await AssetsModel.find().select(["-_id", "title"]);
+            if (imageList.length > 0) {
                 const newImageList = [];
-                for (let i of imageList){
-                    newImageList.push({"title":IMAGE_URI+i.title})
+                for (let i of imageList) {
+                    newImageList.push({ "title": IMAGE_URI + i.title })
                     // console.log(i.title)
                 }
                 res.json(newImageList);
-            }else{
+            } else {
                 res.status(404).json([{ "status": "failed", "message": "Nothing to show" }])
             }
         }
