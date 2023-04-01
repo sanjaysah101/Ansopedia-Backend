@@ -1,3 +1,4 @@
+const { JWT } = require("../utils/JWT")
 const { UserModel } = require("../models/User");
 class Auth {
     static verifyFirebaseToken = async (req, res, next) => {
@@ -26,11 +27,44 @@ class Auth {
     }
     static isAccountVerified = async (req, res, next) => {
         req.user = await UserModel.findOne({ uid: req.firebaseUser.uid });
-        if(req.user){
+        if (req.user) {
             // console.log(req.user)
-             req.user.isAccountVerified ? next() : res.status(403).json([{ "status": "failed", "message": "You have not verified your email. Please verify your email to login." }]);
-        }else{
+            req.user.isAccountVerified ? next() : res.status(403).json([{ "status": "failed", "message": "You have not verified your email. Please verify your email to login." }]);
+        } else {
             res.status(404).json([{ "status": "failed", "message": "User not found" }]);
+        }
+    }
+    static verifyCustomToken = async (req, res, next) => {
+        const { authorization } = req.headers;
+        if (!authorization) {
+            res.status(401).json({ "status": "failed", "message": "Authorization Token is missing" });
+        } else if (!authorization.startsWith("Bearer")) {
+            res.status(401).json({ "status": "failed", "message": "token must start with Bearer" });
+        } else {
+            const token = authorization.split(' ')[1];
+            if (!token) {
+                res.status(401).json({ "status": "failed", "message": "token is missing" });
+            } else {
+                const { message, userId, isValid } = await JWT.verifyAuthToken(token);
+                // console.log(message, userId, isValid)
+                if (!isValid) {
+                    res.status(404).json({ "status": "failed", message });
+                } else {
+                    const user = await UserModel.findById(userId);
+                    // Check is Token expired;
+                    const tok = user.tokens.filter(t => t.token === token);
+                    // console.log(tok)
+                    if (tok.length > 0) {
+                        req.user = user;
+                        req.token = token;
+                        req.status = "Success";
+                        next()
+                    } else {
+                        res.status(403).json({ "status": "Forbidden", "message": "session expire" });
+                    }
+                    // if (err) Logs.errorHandler(err, req, res);
+                }
+            }
         }
     }
 }

@@ -17,6 +17,18 @@ class JWT {
             if (err) throw new Error(`${err} at JWT.generateToken`);
         }
     }
+    static generateTokenWithoutUser = async (user, expiryTime, time) => {
+        try {
+            const SECRET = process.env.ACCESS_TOKEN_SECRET;
+            const token = jwt.sign({ userId: user._id }, SECRET, { expiresIn: expiryTime });
+            const link = `http://localhost:8000/user/verify/${user._id}/${token}`;
+            // console.log(link)
+            await updateToken(user, token, time);
+            return token;
+        } catch (err) {
+            if (err) throw new Error(`${err} at JWT.generateToken`);
+        }
+    }
     static generateLoginToken = async (user, expiryTime, time) => {
         try {
             const token = jwt.sign({ userId: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: expiryTime });
@@ -60,8 +72,7 @@ class JWT {
             }
         } catch (err) {
             message = "invalid user"
-            // console.log(err.message)
-            return { message, user, isValid };
+            return { message, isValid };
         }
     }
 }

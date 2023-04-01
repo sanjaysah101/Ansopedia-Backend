@@ -59,7 +59,6 @@ class Helper {
         try {
             const token = await JWT.generateLoginToken(user, "1d", 86400);
             return token;
-
         } catch (err) {
             if (err) throw new Error(`${err} at Helper.Login`);
         }
@@ -91,7 +90,8 @@ class Helper {
         try {
             const { isVerified, message, status_code } = await OTP.matchOTP(user, otp);
             if (isVerified) {
-                res.status(status_code).json([{ "status": "success", message }])
+                const token = await JWT.generateTokenWithoutUser(user, "15m", 900);
+                res.status(status_code).json([{ "status": "success", message, token }])
             } else {
                 res.status(status_code).json([{ "status": "failed", message }])
             }

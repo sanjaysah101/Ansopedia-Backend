@@ -9,9 +9,10 @@ router.get("/sign-in-with-google", Auth.verifyFirebaseToken, AuthController.sign
 router.post("/register", AuthController.createUserWithEmailAndPassword);
 // router.get("/verify/:id/:token", UserController.verifyEmailByToken);
 router.post("/login", AuthController.signInWithEmailAndPassword);
-// router.post("/send-reset-password-email", UserController.sendResetPasswordEmail);
-// router.post("/verify-otp", UserController.verifyOTP);
+router.post("/send-reset-password-email", AuthController.sendResetPasswordEmail);
+router.post("/verify-otp", AuthController.verifyOTP);
 router.post("/changepassword", Auth.verifyFirebaseToken, Auth.isAccountVerified, AuthController.changeUserPassword);
+router.post("/reset-password", Auth.verifyCustomToken, AuthController.changeUserPassword);
 
 // // Protected Routes
 router.get("/", Auth.verifyFirebaseToken, Auth.isAccountVerified, AuthController.getUser);

@@ -73,7 +73,7 @@ class AuthController {
                             const newUser = new UserModel({ uid: createdUser.user.uid, name, email, "roles": [user], username, password: hashPassword, isAccountVerified: false, tc });
                             await newUser.save();
                             await Helper.Registration(email);
-                            res.status(201).json({ status: "success", message: "Account Verification Email Sent... Please Check Your Email" });
+                            res.status(201).json([{ status: "success", message: "Account Verification Email Sent... Please Check Your Email" }]);
                             // firebaseAdminApp.auth().generateEmailVerificationLink(email)
                             //     .then(async (emailLink) => {
                             //         console.log(emailLink)
@@ -122,16 +122,27 @@ class AuthController {
             res.status(401).json([{ "status": "failed", "message": "All fields are required" }]);
         } else {
             try {
-                await signInWithEmailAndPassword(getAuth(), email, password)
-                    .then((user) => {
-                        // console.log(user);
-                        res.json([{ "status": "success", "message": "Login Success", token: user._tokenResponse.idToken }]);
-                    }).catch((e) => {
-                        if (e.code == "auth/user-not-found")
-                            res.status(404).json([{ "status": "failed", "message": "User not found" }]);
-                        else
-                            res.status(500).json([{ "status": "failed", "message": e.message }]);
-                    })
+                const foundUser = await UserModel.findOne({ email }).select("isAccountVerified");
+                if (!foundUser) {
+                    res.status(404).json([{ "status": "failed", "message": "User not found" }]);
+                } else {
+                    if (!foundUser.isAccountVerified) {
+                        res.status(403).json([{ "status": "failed", "message": "You have not verified your email. Please Verify your email to login." }]);
+                    } else {
+                        await signInWithEmailAndPassword(getAuth(), email, password)
+                            .then((user) => {
+                                // console.log(user);
+                                res.json([{ "status": "success", "message": "Login Success", token: user._tokenResponse.idToken }]);
+                            }).catch((e) => {
+                                if (e.code == "auth/user-not-found")
+                                    res.status(404).json([{ "status": "failed", "message": "User not found" }]);
+                                else if (e.code == "auth/wrong-password")
+                                    res.status(401).json([{ "status": "failed", "message": "Email or Password is not valid" }]);
+                                else
+                                    res.status(500).json([{ "status": "failed", "message": e.message }]);
+                            })
+                    }
+                }
             } catch (error) {
                 res.status(500).json([{ "status": "failed", "message": error?.message }]);
             }
@@ -211,28 +222,69 @@ class AuthController {
                 if (!isStrong) {
                     res.status(400).json([{ "status": "failed", "message": response }]);
                 } else {
-                    let isOldAndNewPasswordMatch = await Utils.matchPassword(password, req.user.password);
-                    if (isOldAndNewPasswordMatch) {
-                        res.status(409).json([{ "status": "success", "message": "new password and old password cannot be same" }]);
-                    } else {
-                        // If old and new password did not match then update password
-                        try {
-                            await firebaseAdminApp.auth().updateUser(req.firebaseUser.uid, { password });
+                    try {
+                        let isOldAndNewPasswordMatch = await Utils.matchPassword(password, req.user.password);
+                        // if isOldAndNewPasswordMatch is false then only update password
+                        if (isOldAndNewPasswordMatch) {
+                            res.status(409).json([{ "status": "success", "message": "new password and old password cannot be same" }]);
+                        } else {
+                            const uid = req.user.uid;
+                            console.log(uid)
+                            // If old and new password did not match then update password
+                            await firebaseAdminApp.auth().updateUser(uid, { password });
                             const hashPassword = await Utils.hashPassword(password);
                             await UserModel.findByIdAndUpdate(req.user._id, {
                                 $set: { password: hashPassword }
                             });
                             res.status(200).json([{ "status": "success", "message": "Password changed successfully" }]);
 
-                        } catch {
-                            res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
-
                         }
+                    } catch(error) {
+                        console.log(error)
+                        res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
+
                     }
                 }
             }
         } else {
             res.status(401).json([{ "status": "failed", "message": "All fields are required" }]);
+        }
+    }
+    static sendResetPasswordEmail = async (req, res) => {
+        try {
+            const { email } = req.body;
+            if (!email) {
+                res.status(401).json([{ "status": "failed", "message": "Email is required" }]);
+            } else if (!Utils.ValidateEmail(email)) {
+                res.status(422).json([{ "status": "failed", "message": "You have entered an invalid email address!" }]);
+            } else {
+                const user = await UserModel.findOne({ email });
+                if (!user) {
+                    res.status(404).json([{ "status": "failed", "message": "User doesn't exists" }]);
+                } else {
+                    await Helper.ForgetPassword(user, req, res);
+                }
+            }
+        } catch (err) {
+            if (err) Logs.errorHandler(err, req, res);
+        }
+    }
+
+    static verifyOTP = async (req, res) => {
+        const { email, otp } = req.body;
+        if (!otp && !email) {
+            res.status(401).json([{ "status": "failed", "message": "all field is required" }]);
+        } else {
+            try {
+                const user = await UserModel.findOne({ email });
+                if (!user) {
+                    res.status(404).json([{ "status": "failed", "message": "User doesn't exists" }]);
+                } else {
+                    await Helper.VerifyOTP(user, otp, req, res);
+                }
+            } catch (err) {
+                res.status(500).json([{ "status": "failed", "message": "something went wrong!!!" }])
+            }
         }
     }
 }
