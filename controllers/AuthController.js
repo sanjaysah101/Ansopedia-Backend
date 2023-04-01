@@ -6,7 +6,7 @@ const { Helper } = require("../utils/Helper");
 const IMAGE_URI = "https://api.ansopedia.com/images/"
 
 // ########################### Error #########################
-const { getAuth, signInWithEmailAndPassword, sendEmailVerification, createUserWithEmailAndPassword, updateCurrentUser, updatePassword } = require("firebase/auth");
+const { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateCurrentUser, updatePassword } = require("firebase/auth");
 const { FirebaseAdminApp } = require("../config/Firebase-admin");
 const credentials = require("../config/firebase-adminsdk.json");
 const { async } = require("@firebase/util");

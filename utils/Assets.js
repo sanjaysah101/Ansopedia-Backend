@@ -37,19 +37,33 @@ class Assets {
                         const fileToUpload = path.join(__dirname, "..", "assets", "avatar");
                         const LOC = path.join(fileToUpload, filename)
                         req.filePath = filename;
-                        const unlinkFile = path.join(fileToUpload, req.user.avatar);
-                        if(existsSync(unlinkFile)){
-                            unlink(unlinkFile, (err) => {
-                                if (err) res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                        if(req.user.avatar){
+                            console.log(req.user.avatar)
+                            const unlinkFile = path.join(fileToUpload, req.user?.avatar);
+                            if(existsSync(unlinkFile)){
+                                unlink(unlinkFile, (err) => {
+                                    if (err) res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                                });
+                            }
+                            file.avatar.mv(`${LOC}`, err => {
+                                if (err) {
+                                    res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                                } else {
+                                    next()
+                                }
+                            });
+                        }else{
+                            // console.log("not")
+                            // console.log("req.user")
+                            file.avatar.mv(`${LOC}`, err => {
+                                if (err) {
+                                    res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
+                                } else {
+                                    next()
+                                }
                             });
                         }
-                        file.avatar.mv(`${LOC}`, err => {
-                            if (err) {
-                                res.status(500).json([{ "status": "failed", "message": "Something went wrong" }]);
-                            } else {
-                                next()
-                            }
-                        });
+                        // console.log(unlinkFile)
 
                         // res.end()
 
