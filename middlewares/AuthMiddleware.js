@@ -1,7 +1,9 @@
 const { Logs } = require("./Logs");
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../models/User.js");
-const { JWT } = require("../utils/JWT")
+const { JWT } = require("../utils/JWT");
+const ApiModel = require("../models/ApiModel");
+const Enum = require("../utils/Enum");
 
 class Auth {
     static authUser = async (req, res, next) => {
@@ -18,7 +20,7 @@ class Auth {
         } catch (err) {
             // Logs.errorHandler(err, req, res);
             console.log(err.message)
-            res.status(401).json({ "status": "failed", "message": err.message })
+            res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, err.message ))
 
         }
     }
@@ -41,14 +43,14 @@ const auth = async (req, res, next) => {
                     req.status = "Success";
                     return true;
                 } else {
-                    res.status(403).json({ "status": "Forbidden", "message": "session expire" });
+                    res.status(403).json(ApiModel.getApiModel("Forbidden", "session expire"));
                 }
             } else {
                 // if (err) Logs.errorHandler(err, req, res);
-                res.status(404).json({ "status": "failed", message });
+                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, message));
             }
         } else {
-            res.status(401).json({ "status": "failed", "message": "token must start with Bearer" });
+            res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "token must start with Bearer"));
         }
     } catch (err) {
         if (err) throw new Error(`Invalid token`);

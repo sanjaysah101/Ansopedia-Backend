@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
     roles: [
         { type: mongoose.Schema.Types.ObjectId, ref: "roles" }
     ],
-    avatar: { type: String },
+    avatar: { type: Object },
     isAccountVerified: {type: Boolean},
     isProfileComplete: {type: Boolean, default : false},
     tokens: [{ type: Object }],

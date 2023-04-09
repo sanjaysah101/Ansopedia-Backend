@@ -6,7 +6,9 @@ const { BranchController } = require("./BranchesController");
 const { SubjectsController } = require("./SubjectsController");
 const { ChaptersController } = require("./ChaptersController");
 const { QuestionController } = require("./QuestionController")
-const {Logs} = require("../../middlewares/Logs")
+const {Logs} = require("../../middlewares/Logs");
+const ApiModel = require("../../models/ApiModel");
+const Enum = require("../../utils/Enum");
 
 class StreamController {
     static addStream = async (req, res) => {
@@ -31,25 +33,25 @@ class StreamController {
                                     if (chapter) {
                                         // If chapter name is mentioned in the url then add questions
                                         const found_chapter = await ChapterModel.findOne({ chapter_name: chapter.toLowerCase() });
-                                        console.log(found_chapter)
+                                        // console.log(found_chapter)
                                         if (found_chapter) {
                                             // if chapter name is not mentioned in the url then add chapters
                                             const { statusCode, message, questionId } = await QuestionController.addQuestion(req);
-                                            console.log(statusCode, message, questionId, found_chapter._id);
+                                            // console.log(statusCode, message, questionId, found_chapter._id);
                                             if (questionId) {
                                                 ChapterModel.findOneAndUpdate({ _id: found_chapter._id }, { $push: { questions: questionId } }, function (error, success) {
                                                     if (error) {
-                                                        res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
+                                                        res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, `something went wrong`));
                                                     } else {
-                                                        res.status(statusCode).json([{ "status": "success", message }]);
+                                                        res.status(statusCode).json(ApiModel.getApiModel(Enum.status.SUCCESS, message));
                                                     }
                                                 })
                                             }
                                             else {
-                                                res.status(statusCode).json([{ "status": "failed", message }]);
+                                                res.status(statusCode).json(ApiModel.getApiModel(Enum.status.FAILED, message));
                                             }
                                         } else {
-                                            res.status(404).json([{ "status": "failed", "message": `${chapter} not found` }]);
+                                            res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${chapter} not found`));
                                         }
                                     } else {
                                         // if chapter name is not mentioned in the url then add chapters
@@ -58,20 +60,20 @@ class StreamController {
                                             // console.log(statusCode, message, chapterId, found_branch._id);
                                             SubjectModel.findOneAndUpdate({ _id: found_subject._id }, { $push: { chapters: chapterId } }, function (error, success) {
                                                 if (error) {
-                                                    res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
+                                                    res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, `something went wrong`));
                                                 } else {
-                                                    res.status(statusCode).json([{ "status": "success", message }]);
+                                                    res.status(statusCode).json(ApiModel.getApiModel(Enum.status.SUCCESS, message));
                                                 }
                                             })
                                         }
                                         else {
-                                            res.status(statusCode).json([{ "status": "failed", message }]);
+                                            res.status(statusCode).json(ApiModel.getApiModel(Enum.status.FAILED, message));
                                         }
 
                                     }
 
                                 } else {
-                                    res.status(404).json([{ "status": "failed", "message": `${subject} not found` }]);
+                                    res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${subject} not found`));
                                 }
                             } else {
                                 // If subject is not mentioned in the url then add new subject
@@ -80,18 +82,18 @@ class StreamController {
                                 if (subjectId) {
                                     BranchModel.findOneAndUpdate({ _id: found_branch._id }, { $push: { subjects: subjectId } }, function (error, success) {
                                         if (error) {
-                                            res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
+                                            res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, `something went wrong`));
                                         } else {
-                                            res.status(statusCode).json([{ "status": "success", message }]);
+                                            res.status(statusCode).json(ApiModel.getApiModel(Enum.status.SUCCESS, message));
                                         }
                                     })
                                 }
                                 else {
-                                    res.status(statusCode).json([{ "status": "failed", message }]);
+                                    res.status(statusCode).json(ApiModel.getApiModel(Enum.status.FAILED, message));
                                 }
                             }
                         } else {
-                            res.status(404).json([{ "status": "failed", "message": `${branch} not found` }]);
+                            res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${branch} not found`));
                         }
                     } else {
                         // If branch not mentioned then add branch
@@ -99,18 +101,18 @@ class StreamController {
                         if (branchId) {
                             StreamModel.findOneAndUpdate({ _id: found_stream._id }, { $push: { branch: branchId } }, function (error, success) {
                                 if (error) {
-                                    res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
+                                    res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, `something went wrong`));
                                 } else {
-                                    res.status(statusCode).json([{ "status": "success", message }]);
+                                    res.status(statusCode).json(ApiModel.getApiModel(Enum.status.SUCCESS, message));
                                 }
                             })
                         }
                         else {
-                            res.status(statusCode).json([{ "status": "failed", message }]);
+                            res.status(statusCode).json(ApiModel.getApiModel(Enum.status.FAILED, message));
                         }
                     }
                 } else {
-                    res.status(404).json([{ "status": "failed", "message": `${stream} not found` }]);
+                    res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${stream} not found`));
                 }
             } else {
                 // If stream is not mentioned in the url then add new stream
@@ -120,19 +122,19 @@ class StreamController {
                     const isExistStream = await StreamModel.findOne({ "title": title.toLowerCase() });
                     // console.log(isExistStream);
                     if (isExistStream) {
-                        await res.status(403).json([{ "status": "failed", "message": `${title} already exists` }]); //conflict
+                        await res.status(403).json(ApiModel.getApiModel(Enum.status.FAILED, `${title} already exists`)); //conflict
                     } else {
                         try {
                             const newStream = new StreamModel({ "title": title.toLowerCase(), description, color, image });
                             await newStream.save();
-                            res.status(201).json([{ "status": "sucess", "message": `${title} Created Successfully` }])
+                            res.status(201).json(ApiModel.getApiModel(Enum.status.FAILED, `${title} Created Successfully`))
                         } catch (err) {
                             // console.log(err);
-                            res.status(500).json([{ "status": "failed", "message": "Unable to Create" }])
+                            res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, `unable to create`))
                         }
                     }
                 } else {
-                    res.status(400).json([{ "status": "failed", "message": "Title is required" }]);
+                    res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, `Title is required`));
                 }
             }
         } catch (err) {
@@ -171,28 +173,28 @@ class StreamController {
                                         if(chapter){
                                             const found_chapter = found_subject[0].chapters.filter(f => f.chapter_name.toLowerCase() == chapter.toLowerCase());
                                             if(found_chapter.length > 0){
-                                                res.json(found_chapter)
+                                                res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_chapter))
                                             }else{
-                                                res.status(404).json([{ "status": "failed", "message": `${chapter} not found` }]);
+                                                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${chapter} not found`));
                                             }
                                         }else{
-                                            res.json(found_subject)
+                                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_subject))
                                         }
                                     } else {
-                                        res.status(404).json([{ "status": "failed", "message": `${subject} not found` }]);
+                                        res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${subject} not found`));
                                     }
                                 } else {
-                                    res.json(found_branch)
+                                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_branch))
                                 }
                             } else {
-                                res.status(404).json([{ "status": "failed", "message": `${branch} not found` }]);
+                                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${branch} not found`));
                             }
                             // console.log(result.branch)
                         } else {
-                            res.json(result)
+                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result))
                         }
                     }
-                    else res.status(404).json([{ "status": "failed", "message": `${stream} not found` }]);
+                    else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${stream} not found`));
                 })
             } else {
                 StreamModel.find().select(["_id", "title", "description", "color", "image"]).populate({
@@ -212,8 +214,10 @@ class StreamController {
                     }
                 }).exec((err, result) => {
                     if (err) throw (err);
-                    else if (result.length > 0) { res.json(result) }
-                    else res.status(404).json([{ "status": "failed", "message": `no data available to show` }]);;
+                    else if (result.length > 0) { 
+                        res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result));
+                     }
+                    else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, "Nothing to show"));;
                 })
             }
         } catch (err) {

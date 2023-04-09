@@ -4,12 +4,14 @@ const { JWT } = require("./JWT");
 const { Notify } = require("./Notify");
 
 const { UserModel } = require("../models/User");
+const ApiModel = require("../models/ApiModel");
+const Enum = require("./Enum");
 class Helper {
     static Registration = async (email) => {
         try {
             // console.log(email)
             const user = await UserModel.findOne({ email });
-            const token = await JWT.generateToken(user, "15m", 900);
+            const token = await JWT.generateToken(user, "365d", 31536000);
             const link = `https://api.ansopedia.com/user/verify/${user._id}/${token}`;
             // console.log(link);
             let otp = OTP.generateOTP();
@@ -22,7 +24,7 @@ class Helper {
     }
     static EmailVerificationByToken = async (user, token, req, res) => {
         try {
-            const isValid = await JWT.verifyToken(user, token, 900);
+            const isValid = await JWT.verifyToken(user, token, 31536000); //Link will expire in 1 year
             if (isValid) {
                 //check if token expired or not
                 const tok = user.tokens.filter(t => t.token === token);
@@ -35,11 +37,10 @@ class Helper {
                     await Mail.sendAccountVerificationConfirmationEmail(user.email, user.name);
                     return true;
                 } else {
-                    res.status(403).json({ "status": "Forbidden", "message": "session expire" });
+                    res.status(403).json(ApiModel.getApiModel(Enum.status.FORBIDDEN, "session expire" ));
                 }
             } else {
-                await UserModel.findByIdAndDelete(user._id);
-                res.status(401).json({ "status": "failed", "message": "link expired" });
+                res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "link expired" ));
             }
             return false;
         } catch (err) {
@@ -76,9 +77,9 @@ class Helper {
 
             if (isSaved) {
                 await Mail.sendForgetPasswordEmail(user.email, user.name, otp);
-                res.json([{ "status": "success", "message": "Password Reset Email Sent... Please Check Your Email" }])
+                res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "Password Reset Email Sent... Please Check Your Email" ))
             } else {
-                res.status(status_code).json([{ "status": "failed", message }]);
+                res.status(status_code).json(ApiModel.getApiModel(Enum.status.FAILED,  message ));
             }
             // console.log(user);
         } catch (err) {
@@ -91,9 +92,9 @@ class Helper {
             const { isVerified, message, status_code } = await OTP.matchOTP(user, otp);
             if (isVerified) {
                 const token = await JWT.generateTokenWithoutUser(user, "15m", 900);
-                res.status(status_code).json([{ "status": "success", message, token }])
+                res.status(status_code).json(ApiModel.getApiModel(Enum.status.SUCCESS, message, {token }))
             } else {
-                res.status(status_code).json([{ "status": "failed", message }])
+                res.status(status_code).json(ApiModel.getApiModel(Enum.status.SUCCESS,  message ))
             }
         } catch (err) {
             if (err) throw new Error(`${err} at Helper.VerifyOTP`);

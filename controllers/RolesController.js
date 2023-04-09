@@ -1,9 +1,11 @@
 const { RoleModel } = require("../models/Roles");
 const { Logs } = require("../middlewares/Logs");
+const ApiModel = require("../models/ApiModel");
+const Enum = require("../utils/Enum");
 
 class RoleController {
     static createRole = async (req, res) => {
-        let message, isRoleCreated = false, statusCode, status = "failed";
+        let message, isRoleCreated = false, statusCode;
         const { title, description } = req.body;
         if (title && description) {
             try {
@@ -26,11 +28,9 @@ class RoleController {
             message = "All fields are required";
         }
         if (!isRoleCreated)
-            res.status(statusCode).json([{ status, message }]);
+            res.status(statusCode).json(ApiModel.getApiModel(Enum.status.SUCCESS, message));
         else {
-            message = "created";
-            status = "success";
-            res.status(201).json([{ status, message }]);
+            res.status(201).json(ApiModel.getApiModel(Enum.status.SUCCESS, "created"));
         }
     }
 }

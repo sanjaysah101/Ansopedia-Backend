@@ -4,7 +4,7 @@ const { UserModel } = require("../models/User.js");
 class OTP {
     // Function to generate OTP
     static generateOTP() {
-        var string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        var string = '0123456789';
         let OTP = '';
         var len = string.length;
         for (let i = 0; i < 6; i++) {
@@ -20,7 +20,7 @@ class OTP {
         if (oldOTP.length) {
             oldOTP = oldOTP.filter(otp => {
                 const timeDiff = (Date.now() - parseInt(otp?.createdAt)) / 1000; //This will return remaining time in second
-                if (timeDiff < 900) return otp; // otp expire in 15 min
+                if (timeDiff < 300) return otp; // otp expire in 5 min
             })
         }
         const otp = await UserModel.findById(user._id).select({ "otp": 1 });
@@ -77,7 +77,7 @@ class OTP {
             if (oldOTP.length) {
                 oldOTP = oldOTP.filter(otp => {
                     const timeDiff = (Date.now() - parseInt(otp.createdAt)) / 1000; //This will return remaining time in second
-                    if (timeDiff < 900) return otp; // otp expire in 5 min
+                    if (timeDiff < 300) return otp; // otp expire in 5 min
                 })
             }
             oldOTP.forEach(otp => {

@@ -1,6 +1,8 @@
 const { NotificationModel } = require("../models/Notification");
 const { Logs } = require("../middlewares/Logs");
 const { UserModel } = require("../models/User");
+const ApiModel = require("../models/ApiModel");
+const Enum = require("../utils/Enum");
 
 class NotificationController {
     static createNotification = async (req, res) => {
@@ -19,12 +21,12 @@ class NotificationController {
                 if (title && message) {
                     const notification = new NotificationModel({ title, message, time, scope });
                     const result = await notification.save();
-                    res.send(result)
+                    res.send(ApiModel.getApiModel(Enum.status.SUCCESS, "", result));
                 } else {
-                    res.status(401).json([{ "status": "failed", "message": "All fields are required" }]);
+                    res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "All fields are required"));
                 }
             } else {
-                res.status(403).json([{ "status": "failed", "message": "You don't hava permission to access" }]);
+                res.status(403).json(ApiModel.getApiModel(Enum.status.FAILED, "You don't hava permission to access"));
             }
         } catch (err) {
             if (err) Logs.errorHandler(err, req, res);
@@ -42,9 +44,9 @@ class NotificationController {
             });
             const notify = [...userNotification.notifications, ...GlobalNotifications]
             if (notify.length > 0) {
-                res.status(200).json(notify.reverse());
+                res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "Here is notification", notify.reverse()));
             } else {
-                res.status(404).json([{ "status": "failed", "message": "There is nothing to show" }]);
+                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, "There is nothing to show"));
             }
         } catch (err) {
             if (err) Logs.errorHandler(err, req, res);
