@@ -5,7 +5,7 @@ dotenv.config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const DB_Name = process.env.DATABASE_NAME;
-const whitelist = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const whitelist = ["http://localhost:3000", "http://127.0.0.1:3000", "https://www.google.com", "https://www.bing.com"];
 
 mongoose.set('strictQuery', true);
 class Config {

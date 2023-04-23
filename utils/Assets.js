@@ -41,8 +41,8 @@ class Assets {
                         const fileToUpload = path.join(__dirname, "..", "assets", "avatar");
                         const LOC = path.join(fileToUpload, filename)
                         req.filePath = filename;
-                        if (req.user.avatar.picture) {
-                            console.log(req.user.avatar.picture)
+                        if (req.user?.avatar?.picture) {
+                            console.log(req.user?.avatar?.picture)
                             const unlinkFile = path.join(fileToUpload, req.user?.avatar.picture);
                             if (existsSync(unlinkFile)) {
                                 unlink(unlinkFile, (err) => {
@@ -129,7 +129,7 @@ class Assets {
 
     static getFile = (req, res) => {
         // console.log(req.user.avatar.picture)
-        let filename = req.user.avatar.picture;
+        let filename = req.user?.avatar?.picture;
         if (filename) {
             const LOC = path.join("assets", "avatar", filename)
             res.download(LOC, function (error) {

@@ -10,7 +10,7 @@ class Logs {
         const message = `${err.name}: at  ${req.url} ==> ${err.message}`;
         await logEvents(message, 'errLog.txt');
         // res.status(500).json([{ "status": "failed", "message": "something went wrong" }]);
-        res.end(ApiModel.getApiModel(Enum.status.FAILED, "something went wrong"))
+        res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, err.message))
     }
 }
 

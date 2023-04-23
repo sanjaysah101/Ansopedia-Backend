@@ -1,10 +1,12 @@
 require("dotenv").config();
+const compression = require('compression')
 const express = require("express");
 const cors = require("cors");
 const path = require("path")
 const expressUpload = require("express-fileupload");
 const { Logs } = require("./middlewares/Logs");
 const { Config } = require("./config/Config");
+const { whitelist } = require("./middlewares/CorsWhiteList");
 
 // ############################ Init #################################
 const app = express();
@@ -18,12 +20,18 @@ app.use(express.json());
 // For Express-FileUpload
 app.use(expressUpload());
 
+// compress all responses
+// Compress all HTTP responses
+app.use(compression());
+
 // To use HBS
 app.set('view engine', 'hbs')
 // app.use(express.static(path.join(__dirname, "..","public")));
 
 //CORS Policy - Enble for every device
+app.use(cors())
 app.use(cors(Config.corsOptions))
+app.use(whitelist)
 
 //Database Connection
 Config.connectDb();
@@ -49,6 +57,8 @@ app.use("/api/user", require("./routes/AuthRoute"));
 
 // Non Api Routes
 app.use("/", require("./routes/NonApiRoute"));
+app.get("/example", (req, res)=> res.send("sdfsdf"))
+ 
 
 // Handling non matching request from the client
 app.all("*", (req, res) => {
