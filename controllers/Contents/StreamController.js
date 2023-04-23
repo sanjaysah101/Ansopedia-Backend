@@ -6,7 +6,7 @@ const { BranchController } = require("./BranchesController");
 const { SubjectsController } = require("./SubjectsController");
 const { ChaptersController } = require("./ChaptersController");
 const { QuestionController } = require("./QuestionController")
-const {Logs} = require("../../middlewares/Logs");
+const { Logs } = require("../../middlewares/Logs");
 const ApiModel = require("../../models/ApiModel");
 const Enum = require("../../utils/Enum");
 
@@ -141,84 +141,144 @@ class StreamController {
             if (err) Logs.errorHandler(err, req, res);
         }
     }
+    // static getStream = async (req, res) => {
+    //     try {
+    //         const { stream, branch, subject, chapter } = req.params;
+    //         // console.log(stream, branch, subject, chapter)
+    //         if (stream) {
+    //             StreamModel.findOne({ title: stream.toLowerCase() }).select(["_id", "title", "description", "color", "image"]).populate({
+    //                 path: "branch",
+    //                 select: ["branch_name", "description", , "subjects", "color", "image"],
+    //                 populate: {
+    //                     path: "subjects",
+    //                     select: ["subject_name", "description", "chapters", "color", "image"],
+    //                     populate: {
+    //                         path: "chapters",
+    //                         select: ["chapter_name", "description", "questions"],
+    //                         populate: {
+    //                             path: "questions",
+    //                             select: ["question_title", "description", "options"],
+    //                         }
+    //                     }
+    //                 }
+    //             }).exec((err, result) => {
+    //                 if (err) Logs.errorHandler(err, req, res);
+    //                 else if (result) {
+    //                     if (branch) {
+    //                         const found_branch = result.branch.filter(f => f.branch_name.toLowerCase() == branch.toLowerCase());
+    //                         if (found_branch.length > 0) {
+    //                             if (subject) {
+    //                                 const found_subject = found_branch[0].subjects.filter(f => f.subject_name.toLowerCase() == subject.toLowerCase());
+    //                                 if (found_subject.length > 0) {
+    //                                     if (chapter) {
+    //                                         const found_chapter = found_subject[0].chapters.filter(f => f.chapter_name.toLowerCase() == chapter.toLowerCase());
+    //                                         if (found_chapter.length > 0) {
+    //                                             res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_chapter))
+    //                                         } else {
+    //                                             res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${chapter} not found`));
+    //                                         }
+    //                                     } else {
+    //                                         res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_subject))
+    //                                     }
+    //                                 } else {
+    //                                     res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${subject} not found`));
+    //                                 }
+    //                             } else {
+    //                                 res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_branch))
+    //                             }
+    //                         } else {
+    //                             res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${branch} not found`));
+    //                         }
+    //                         // console.log(result.branch)
+    //                     } else {
+    //                         res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result))
+    //                     }
+    //                 }
+    //                 else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${stream} not found`));
+    //             })
+    //         } else {
+    //             StreamModel.find().select(["_id", "title", "description", "color", "image"]).populate({
+    //                 path: "branch",
+    //                 select: ["branch_name", "description", , "subjects", "color", "image"],
+    //                 populate: {
+    //                     path: "subjects",
+    //                     select: ["subject_name", "description", "chapters", "color", "image"],
+    //                     populate: {
+    //                         path: "chapters",
+    //                         select: ["chapter_name", "description", "questions"],
+    //                         populate: {
+    //                             path: "questions",
+    //                             select: ["question_title", "description", "options"],
+    //                         }
+    //                     }
+    //                 }
+    //             }).exec((err, result) => {
+    //                 if (err) throw (err);
+    //                 else if (result.length > 0) {
+    //                     res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result));
+    //                 }
+    //                 else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, "Nothing to show"));;
+    //             })
+    //         }
+    //     } catch (err) {
+    //         if (err) Logs.errorHandler(err, req, res);
+    //     }
+    // }
     static getStream = async (req, res) => {
+        const { stream, branch, subject, chapter } = req.params;
         try {
-            const { stream, branch, subject, chapter } = req.params;
-            // console.log(stream, branch, subject, chapter)
+            const data = await StreamModel.find().select(["_id", "title", "description", "color", "image"]).populate({
+                path: "branch",
+                select: ["branch_name", "description", , "subjects", "color", "image"],
+                populate: {
+                    path: "subjects",
+                    select: ["subject_name", "description", "chapters", "color", "image"],
+                    populate: {
+                        path: "chapters",
+                        select: ["chapter_name", "description", "questions"],
+                        populate: {
+                            path: "questions",
+                            select: ["question_title", "description", "options"],
+                        }
+                    }
+                }
+            })
             if (stream) {
-                StreamModel.findOne({ title: stream.toLowerCase() }).select(["_id", "title", "description", "color", "image"]).populate({
-                    path: "branch",
-                    select: ["branch_name", "description", , "subjects", "color", "image"],
-                    populate: {
-                        path: "subjects",
-                        select: ["subject_name", "description", "chapters", "color", "image"],
-                        populate: {
-                            path: "chapters",
-                            select: ["chapter_name", "description", "questions"],
-                            populate: {
-                                path: "questions",
-                                select: ["question_title", "description", "options"],
-                            }
-                        }
-                    }
-                }).exec((err, result) => {
-                    if (err) Logs.errorHandler(err, req, res);
-                    else if (result) {
-                        if (branch) {
-                            const found_branch = result.branch.filter(f => f.branch_name.toLowerCase() == branch.toLowerCase());
-                            if (found_branch.length > 0) {
-                                if (subject) {
-                                    const found_subject = found_branch[0].subjects.filter(f => f.subject_name.toLowerCase() == subject.toLowerCase());
-                                    if (found_subject.length > 0) {
-                                        if(chapter){
-                                            const found_chapter = found_subject[0].chapters.filter(f => f.chapter_name.toLowerCase() == chapter.toLowerCase());
-                                            if(found_chapter.length > 0){
-                                                res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_chapter))
-                                            }else{
-                                                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${chapter} not found`));
-                                            }
+                const streamData = data.find(f => f.title.toLowerCase() === stream.toLowerCase());
+                if (streamData)
+                    if(branch){                        
+                        const branchData = streamData.branch.find(f => f.branch_name.toLowerCase() === branch.toLowerCase());
+                        if(branchData){
+                            if(subject){
+                                const subjectData = branchData.subjects.find(f => f.subject_name.toLowerCase() === subject.toLowerCase());
+                                if(subjectData){
+                                    if(chapter){
+                                        const chapterData = subjectData.chapters.find(f => f.chapter_name.toLowerCase() === chapter.toLowerCase());
+                                        if(chapterData){
+                                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${chapter}`, chapterData))
                                         }else{
-                                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_subject))
+                                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${chapter} not found`))
                                         }
-                                    } else {
-                                        res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${subject} not found`));
+                                    }else{
+                                        res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${subject}`, subjectData))
                                     }
-                                } else {
-                                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", found_branch))
+                                }else{
+                                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${subject} not found`))
                                 }
-                            } else {
-                                res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${branch} not found`));
+                            }else{
+                                res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${branch}`, branchData))
                             }
-                            // console.log(result.branch)
-                        } else {
-                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result))
+                        }else{
+                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${branch} not found`))
                         }
+                    }else{
+                        res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${stream}`, streamData))
                     }
-                    else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${stream} not found`));
-                })
+                else {
+                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${stream} not found`))
+                }
             } else {
-                StreamModel.find().select(["_id", "title", "description", "color", "image"]).populate({
-                    path: "branch",
-                    select: ["branch_name", "description", , "subjects", "color", "image"],
-                    populate: {
-                        path: "subjects",
-                        select: ["subject_name", "description", "chapters", "color", "image"],
-                        populate: {
-                            path: "chapters",
-                            select: ["chapter_name", "description", "questions"],
-                            populate: {
-                                path: "questions",
-                                select: ["question_title", "description", "options"],
-                            }
-                        }
-                    }
-                }).exec((err, result) => {
-                    if (err) throw (err);
-                    else if (result.length > 0) { 
-                        res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is data", result));
-                     }
-                    else res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, "Nothing to show"));;
-                })
+                res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is content", data));
             }
         } catch (err) {
             if (err) Logs.errorHandler(err, req, res);
