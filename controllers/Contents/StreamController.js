@@ -257,25 +257,25 @@ class StreamController {
                                         if(chapterData){
                                             res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${chapter}`, chapterData))
                                         }else{
-                                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${chapter} not found`))
+                                            res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${chapter} not found`))
                                         }
                                     }else{
                                         res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${subject}`, subjectData))
                                     }
                                 }else{
-                                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${subject} not found`))
+                                    res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${subject} not found`))
                                 }
                             }else{
                                 res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${branch}`, branchData))
                             }
                         }else{
-                            res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${branch} not found`))
+                            res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${branch} not found`))
                         }
                     }else{
                         res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `There is ${stream}`, streamData))
                     }
                 else {
-                    res.json(ApiModel.getApiModel(Enum.status.SUCCESS, `${stream} not found`))
+                    res.status(404).json(ApiModel.getApiModel(Enum.status.FAILED, `${stream} not found`))
                 }
             } else {
                 res.json(ApiModel.getApiModel(Enum.status.SUCCESS, "There is content", data));
