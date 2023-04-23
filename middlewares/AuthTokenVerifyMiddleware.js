@@ -28,7 +28,9 @@ class Auth {
         }
     }
     static isAccountVerified = async (req, res, next) => {
-        req.user = await UserModel.findOne({ uid: req.firebaseUser.uid });
+        req.user = await UserModel.findOne({ uid: req.firebaseUser.uid }).populate({
+            "path": "roles"
+        });
         if (req.user) {
             // console.log(req.user)
 

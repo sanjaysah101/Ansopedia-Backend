@@ -19,7 +19,7 @@ class Utils {
             return false;
         }
     }
-    static checkPasswordValidation(value) {
+    static checkPasswordValidation = async (value) => {
         const isWhitespace = /^(?=.*\s)/;
         const isContainsUppercase = /^(?=.*[A-Z])/;
         const isContainsLowercase = /^(?=.*[a-z])/;
@@ -75,8 +75,25 @@ class Utils {
     static matchPassword = async (newPassword, password) => {
         return await bcrypt.compare(newPassword, password);
     }
+    static generateUsername() {
+        var string = 'abcdefghijklmnopqrestuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let username = '';
+        var len = string.length;
+        for (let i = 0; i < 6; i++) {
+            username += string[Math.floor(Math.random() * len)];
+        }
+        return username;
+    }
+    static generatePassword() {
+        var string = 'abcdefghijklmnopqrestuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789!@#$%^&*()--+={}';
+        let password = '';
+        var len = string.length;
+        for (let i = 0; i < 8; i++) {
+            password += string[Math.floor(Math.random() * len)];
+        }
+        return password;
+    }
 
-   
 }
 
 module.exports = { Utils }

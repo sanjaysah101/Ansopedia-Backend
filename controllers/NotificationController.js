@@ -7,26 +7,14 @@ const Enum = require("../utils/Enum");
 class NotificationController {
     static createNotification = async (req, res) => {
         try {
-            const UserRoles = [];
-            for (let r in req.user.roles) UserRoles.push(r); //fetch roles 
-            let canSend = false;
-            for (let role of UserRoles) {
-                if (role.toLowerCase() === "superadmin") {
-                    canSend = true;
-                }
-            }
-            if (canSend) {
-                const { title, message, time } = req.body;
-                const scope = "global";
-                if (title && message) {
-                    const notification = new NotificationModel({ title, message, time, scope });
-                    const result = await notification.save();
-                    res.send(ApiModel.getApiModel(Enum.status.SUCCESS, "", result));
-                } else {
-                    res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "All fields are required"));
-                }
+            const { title, message, time } = req.body;
+            const scope = "global";
+            if (title && message) {
+                const notification = new NotificationModel({ title, message, time, scope });
+                await notification.save();
+                res.send(ApiModel.getApiModel(Enum.status.SUCCESS, `${title} Send`));
             } else {
-                res.status(403).json(ApiModel.getApiModel(Enum.status.FAILED, "You don't hava permission to access"));
+                res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "All fields are required"));
             }
         } catch (err) {
             if (err) Logs.errorHandler(err, req, res);

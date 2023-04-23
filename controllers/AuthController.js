@@ -14,7 +14,40 @@ const ApiModel = require("../models/ApiModel");
 const Enum = require("../utils/Enum");
 let firebaseAdminApp = FirebaseAdminApp.getInstance(credentials).firebaseAdminApp;
 
+const getUsername = async (email) => {
+    let newUsername = Utils.generateUsername();
+    const isUsernameExist = await UserModel.findOne({ username: newUsername });
+    if (!isUsernameExist) {
+        return newUsername;
+    } else {
+        return getUsername()
+    }
+}
+// const getUsername = async (email) => {
+//     const newUsername = email.split("@")[0];
+//     return await checkUserName(newUsername);
+// }
 
+// const checkUserName = async (username) => {
+//     const isUsernameExist = await UserModel.findOne({ username: username });
+//     if (!isUsernameExist) {
+//         return username;
+//     } else {
+//         username += Math.floor(Math.random() * 10);
+//         return checkUserName(username);
+//     }
+// }
+
+const getPassword = async () => {
+    let newPassword = Utils.generatePassword();
+    const { isStrong } = await Utils.checkPasswordValidation(newPassword);
+    if (!isStrong) {
+        return getPassword()
+    }
+    else {
+        return newPassword;
+    }
+}
 class AuthController {
 
     static sign_in_with_google = async (req, res) => {
@@ -25,16 +58,40 @@ class AuthController {
                 // console.log("saving user...")
                 // console.log(uid, name, picture, email, email_verified)
                 const user = await RoleModel.findOne({ "title": "user" }).select("_id");
-                const newUser = new UserModel({ uid: req.firebaseUser.uid, name, email, "roles": [user], username: email, password: email, avatar: { isCreatedwithGoogle: true, picture }, isAccountVerified: email_verified, tc: true });
+                const newUsername = await getUsername(email);
+                const newPassword = await getPassword();
+                // console.log("final password", newPassword)
+
+                await firebaseAdminApp.auth().updateUser(uid, { password: newPassword });
+                const hashPassword = await Utils.hashPassword(newPassword);
+                const newUser = new UserModel(
+                    {
+                        uid,
+                        name,
+                        email,
+                        "roles": [user],
+                        username: newUsername,
+                        password: hashPassword,
+                        avatar: { isCreatedwithGoogle: true, picture },
+                        isAccountVerified: email_verified,
+                        tc: true
+                    });
                 await newUser.save();
+                // console.log(newUser)
                 const savedUser = await UserModel.findOne({ "uid": req.firebaseUser.uid });
-                if (Helper.VerifyEmailByFirebase(savedUser)) {
+                const context = {
+                    name: savedUser.name,
+                    password: newPassword,
+                    passwordMessage: "Please keep your password safe",
+                    message: "Congratulation Your account has been created",
+                }
+                if (Helper.VerifyEmailByFirebase(savedUser, context)) {
                     res.render('congratulation', {
-                        name: user.name,
-                        message: "Congratulation on Account Verification"
+                        name: savedUser.name,
+                        message: "Congratulation Your account has been created",
                     });
                 }
-                res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "User updated successfully"));
+                res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "User updated successfully", { newUser, newPassword }));
             } catch (error) {
                 res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, error))
             }
@@ -57,7 +114,7 @@ class AuthController {
             } else if (!tc) {
                 res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, "You must agree terms & condition to login"));
             } else {
-                const { isStrong, response } = Utils.checkPasswordValidation(password);
+                const { isStrong, response } = await Utils.checkPasswordValidation(password);
                 if (!isStrong) {
                     res.status(401).json(ApiModel.getApiModel(Enum.status.FAILED, response));
                 } else {
@@ -155,9 +212,9 @@ class AuthController {
     static getUser = async (req, res) => {
         const { _id, name, email, username, avatar, isAccountVerified, mobile, designation, socialProfiles, coins } = req.user;
         let userProfile = ""
-        if(avatar?.isCreatedwithGoogle){
+        if (avatar?.isCreatedwithGoogle) {
             userProfile = avatar?.picture;
-        }else{
+        } else {
             userProfile = IMAGE_URI + avatar?.picture;
         }
         res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "Data found", {
@@ -167,7 +224,7 @@ class AuthController {
     static UpdateAvatar = async (req, res) => {
         try {
             await UserModel.findByIdAndUpdate(req.user._id, {
-                $set: { avatar: { isCreatedwithGoogle: false, picture :req.filePath }}
+                $set: { avatar: { isCreatedwithGoogle: false, picture: req.filePath } }
             })
             await Helper.Update(req.user._id);
             res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "Profile uploaded successfully"));
@@ -227,7 +284,7 @@ class AuthController {
             if (password !== password_confirmation) {
                 res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, "New Password & confirm new password doesn't match"))
             } else {
-                const { isStrong, response } = Utils.checkPasswordValidation(password);
+                const { isStrong, response } = await Utils.checkPasswordValidation(password);
                 if (!isStrong) {
                     res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, response))
                 } else {

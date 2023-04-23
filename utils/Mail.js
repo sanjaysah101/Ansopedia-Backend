@@ -25,11 +25,11 @@ class Mail {
         const context = { otp, name}
         await sendMail(FROM_NOREPLY, email, subject, template, context);
     }
-    static sendAccountVerificationConfirmationEmail = async (email, name) => {
+    static sendAccountVerificationConfirmationEmail = async (email, content) => {
         // let message = "Account is Verified";
         const template = "accountVerificationConfirmation";
         let subject = "Ansopedia - Congratulation on Account Verification";
-        const context = {name}
+        const context = {...content}
         await sendMail(FROM_NOREPLY, email, subject, template, context);
     }
     static sendContactResponseEmail = async (email, name, message) => {

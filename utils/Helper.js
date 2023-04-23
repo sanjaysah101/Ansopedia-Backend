@@ -50,10 +50,10 @@ class Helper {
         }
 
     }
-    static VerifyEmailByFirebase = async (user) => {
+    static VerifyEmailByFirebase = async (user, context) => {
         await Notify.registration(user);
         await Notify.emailVerification(user);
-        await Mail.sendAccountVerificationConfirmationEmail(user.email, user.name);
+        await Mail.sendAccountVerificationConfirmationEmail(user.email, context);
         return true;
     }
     static Login = async (user) => {
