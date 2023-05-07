@@ -76,7 +76,7 @@ class Assets {
 
 
                     } else {
-                        res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, "Avatar size is to large", { "maxSize": MAXSIZE }));
+                        res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, "Avatar size is too large", { "maxSize": MAXSIZE }));
                     }
                 }
                 // console.log(extension)
@@ -114,7 +114,7 @@ class Assets {
                             }
                         });
                     } else {
-                        res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, "Image size is to large", { "maxSize": MAXSIZE }));
+                        res.status(400).json(ApiModel.getApiModel(Enum.status.FAILED, "Image size is too large", { "maxSize": MAXSIZE }));
                     }
                 }
                 // console.log(extension)

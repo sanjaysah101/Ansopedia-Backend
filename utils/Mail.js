@@ -42,8 +42,7 @@ class Mail {
 
 const sendMail = async (from, to, subject, template, context) => {
     try {
-        const transporter = await 
-        Config.nodemailerTransport(from);
+        const transporter = await Config.nodemailerTransport(from);
         // point to the template folder
         const handlebarOptions = {
             viewEngine: {

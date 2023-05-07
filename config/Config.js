@@ -22,12 +22,15 @@ class Config {
         }
     }
 
-    static nodemailerTransport = (FROM) => nodemailer.createTransport({
+    static nodemailerTransport = async (FROM) => nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         auth: {
             user: FROM,
             pass: process.env.EMAIL_PASS
+        },
+        tls: {
+            rejectUnauthorized: false
         }
     });
 
