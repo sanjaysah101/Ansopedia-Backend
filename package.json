@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app",
     "dev": "nodemon app",
-    "debug": "nodemon --inspect app.js"
+    "debug": "nodemon --inspect app.js",
+    "build": "node"
   },
   "repository": {
     "type": "git",

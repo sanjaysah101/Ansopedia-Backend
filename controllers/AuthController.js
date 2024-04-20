@@ -1,9 +1,9 @@
-const { Utils } = require("../utils/Utils");
-const { Logs } = require("../middlewares/Logs");
-const { RoleModel } = require("../models/Roles");
-const { UserModel } = require("../models/User.js");
-const { Helper } = require("../utils/Helper");
-const IMAGE_URI = "https://api.ansopedia.com/images/";
+const { Utils } = require('../utils/Utils');
+const { Logs } = require('../middlewares/Logs');
+const { RoleModel } = require('../models/Roles');
+const { UserModel } = require('../models/User.js');
+const { Helper } = require('../utils/Helper');
+const IMAGE_URI = 'https://api.ansopedia.com/images/';
 
 // ########################### Error #########################
 const {
@@ -13,12 +13,12 @@ const {
   updateCurrentUser,
   updatePassword,
   fetchSignInMethodsForEmail,
-} = require("firebase/auth");
-const { FirebaseAdminApp } = require("../config/Firebase-admin");
-const credentials = require("../config/firebase-adminsdk.json");
-const { async } = require("@firebase/util");
-const ApiModel = require("../models/ApiModel");
-const Enum = require("../utils/Enum");
+} = require('firebase/auth');
+const { FirebaseAdminApp } = require('../config/Firebase-admin');
+const { credentials } = require('../config/firebase-adminsdk.js');
+const { async } = require('@firebase/util');
+const ApiModel = require('../models/ApiModel');
+const Enum = require('../utils/Enum');
 let firebaseAdminApp =
   FirebaseAdminApp.getInstance(credentials).firebaseAdminApp;
 
@@ -59,13 +59,13 @@ class AuthController {
   static sign_in_with_google = async (req, res) => {
     const isUserExist = await UserModel.findOne({
       uid: req.firebaseUser.uid,
-    }).select("_id");
+    }).select('_id');
     if (!isUserExist) {
       try {
         const { uid, name, picture, email, email_verified } = req.firebaseUser;
         // console.log("saving user...")
         // console.log(uid, name, picture, email, email_verified)
-        const user = await RoleModel.findOne({ title: "user" }).select("_id");
+        const user = await RoleModel.findOne({ title: 'user' }).select('_id');
         const newUsername = await getUsername(email);
         const newPassword = await getPassword();
         // console.log("final password", newPassword)
@@ -93,13 +93,13 @@ class AuthController {
         const context = {
           name: savedUser.name,
           password: newPassword,
-          passwordMessage: "Please keep your password safe",
-          message: "Congratulation Your account has been created",
+          passwordMessage: 'Please keep your password safe',
+          message: 'Congratulation Your account has been created',
         };
         if (Helper.VerifyEmailByFirebase(savedUser, context)) {
-          res.render("congratulation", {
+          res.render('congratulation', {
             name: savedUser.name,
-            message: "Congratulation Your account has been created",
+            message: 'Congratulation Your account has been created',
           });
         }
         res
@@ -107,7 +107,7 @@ class AuthController {
           .json(
             ApiModel.getApiModel(
               Enum.status.SUCCESS,
-              "User updated successfully",
+              'User updated successfully',
               { newUser, newPassword }
             )
           );
@@ -115,7 +115,7 @@ class AuthController {
         res.status(500).json(ApiModel.getApiModel(Enum.status.FAILED, error));
       }
     } else {
-      res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, "ok"));
+      res.status(200).json(ApiModel.getApiModel(Enum.status.SUCCESS, 'ok'));
     }
   };
   static createUserWithEmailAndPassword = async (req, res) => {
@@ -129,7 +129,7 @@ class AuthController {
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "You have entered an invalid email address!"
+              'You have entered an invalid email address!'
             )
           );
       } else if (!Utils.isAllLetter(name)) {
@@ -138,7 +138,7 @@ class AuthController {
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "Name must only contain alphabets"
+              'Name must only contain alphabets'
             )
           );
       } else if (name.length < 3) {
@@ -147,7 +147,7 @@ class AuthController {
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "Name must be greater than 2 letter"
+              'Name must be greater than 2 letter'
             )
           );
       } else if (password !== password_confirmation) {
@@ -165,7 +165,7 @@ class AuthController {
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "You must agree terms & condition to login"
+              'You must agree terms & condition to login'
             )
           );
       } else {
@@ -185,7 +185,7 @@ class AuthController {
                 .json(
                   ApiModel.getApiModel(
                     Enum.status.FAILED,
-                    "username already exist"
+                    'username already exist'
                   )
                 );
             } else {
@@ -197,8 +197,8 @@ class AuthController {
               // console.log(createdUser.user.uid)
               const hashPassword = await Utils.hashPassword(password);
               // const superadmin = await RoleModel.findOne({ "title": "superadmin" }).select("_id");
-              const user = await RoleModel.findOne({ title: "user" }).select(
-                "_id"
+              const user = await RoleModel.findOne({ title: 'user' }).select(
+                '_id'
               );
               const newUser = new UserModel({
                 uid: createdUser.user.uid,
@@ -217,7 +217,7 @@ class AuthController {
                 .json(
                   ApiModel.getApiModel(
                     Enum.status.SUCCESS,
-                    "Account Verification Email Sent... Please Check Your Email"
+                    'Account Verification Email Sent... Please Check Your Email'
                   )
                 );
               // firebaseAdminApp.auth().generateEmailVerificationLink(email)
@@ -247,13 +247,13 @@ class AuthController {
               // })
             }
           } catch (err) {
-            if (err.code == "auth/email-already-in-use") {
+            if (err.code == 'auth/email-already-in-use') {
               res
                 .status(403)
                 .json(
                   ApiModel.getApiModel(
                     Enum.status.FAILED,
-                    "Email already exists"
+                    'Email already exists'
                   )
                 );
             } else {
@@ -268,7 +268,7 @@ class AuthController {
       res
         .status(401)
         .json(
-          ApiModel.getApiModel(Enum.status.FAILED, "All fields are required")
+          ApiModel.getApiModel(Enum.status.FAILED, 'All fields are required')
         );
     }
   };
@@ -279,17 +279,17 @@ class AuthController {
       res
         .status(401)
         .json(
-          ApiModel.getApiModel(Enum.status.FAILED, "All fields are required")
+          ApiModel.getApiModel(Enum.status.FAILED, 'All fields are required')
         );
     } else {
       try {
         const foundUser = await UserModel.findOne({ email }).select(
-          "isAccountVerified"
+          'isAccountVerified'
         );
         if (!foundUser) {
           res
             .status(404)
-            .json(ApiModel.getApiModel(Enum.status.FAILED, "User not found"));
+            .json(ApiModel.getApiModel(Enum.status.FAILED, 'User not found'));
         } else {
           if (!foundUser.isAccountVerified) {
             res
@@ -297,43 +297,41 @@ class AuthController {
               .json(
                 ApiModel.getApiModel(
                   Enum.status.FAILED,
-                  "You have not verified your email. Please Verify your email to login."
+                  'You have not verified your email. Please Verify your email to login.'
                 )
               );
           } else {
             await signInWithEmailAndPassword(getAuth(), email, password)
               .then((user) => {
-                res
-                  .status(200)
-                  .json(
-                    ApiModel.getApiModel(Enum.status.SUCCESS, "Login Success", {
-                      token: user._tokenResponse.idToken,
-                    })
-                  );
+                res.status(200).json(
+                  ApiModel.getApiModel(Enum.status.SUCCESS, 'Login Success', {
+                    token: user._tokenResponse.idToken,
+                  })
+                );
               })
               .catch((e) => {
-                if (e.code == "auth/user-not-found")
+                if (e.code == 'auth/user-not-found')
                   res
                     .status(404)
                     .json(
-                      ApiModel.getApiModel(Enum.status.FAILED, "User not found")
+                      ApiModel.getApiModel(Enum.status.FAILED, 'User not found')
                     );
-                else if (e.code == "auth/wrong-password")
+                else if (e.code == 'auth/wrong-password')
                   res
                     .status(401)
                     .json(
                       ApiModel.getApiModel(
                         Enum.status.FAILED,
-                        "Email or Password is not valid"
+                        'Email or Password is not valid'
                       )
                     );
-                else if (e.code == "auth/too-many-requests")
+                else if (e.code == 'auth/too-many-requests')
                   res
                     .status(429)
                     .json(
                       ApiModel.getApiModel(
                         Enum.status.FAILED,
-                        "Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later."
+                        'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.'
                       )
                     );
                 else
@@ -364,14 +362,14 @@ class AuthController {
       socialProfiles,
       coins,
     } = req.user;
-    let userProfile = "";
+    let userProfile = '';
     if (avatar?.isCreatedwithGoogle) {
       userProfile = avatar?.picture;
     } else {
       userProfile = IMAGE_URI + avatar?.picture;
     }
     res.status(200).json(
-      ApiModel.getApiModel(Enum.status.SUCCESS, "Data found", {
+      ApiModel.getApiModel(Enum.status.SUCCESS, 'Data found', {
         _id,
         name,
         email,
@@ -396,7 +394,7 @@ class AuthController {
         .json(
           ApiModel.getApiModel(
             Enum.status.SUCCESS,
-            "Profile uploaded successfully"
+            'Profile uploaded successfully'
           )
         );
     } catch (err) {
@@ -406,7 +404,7 @@ class AuthController {
   static updateUser = async (req, res) => {
     const { name, designation, mobile, socialProfiles, username } = req.body;
     let status_code = 304,
-      message = "There is nothing to update",
+      message = 'There is nothing to update',
       isUpdated = false;
     try {
       if (name) {
@@ -417,13 +415,13 @@ class AuthController {
           }
         } else {
           status_code = 422;
-          message = "Invalid name";
+          message = 'Invalid name';
         }
       }
       if (designation) {
         let tempDesignation = req.user.designation
           ? req.user.designation.toLowerCase()
-          : "";
+          : '';
         if (tempDesignation.toLowerCase() !== designation.toLowerCase()) {
           await UserModel.findByIdAndUpdate(req.user._id, { designation });
           isUpdated = true;
@@ -438,7 +436,7 @@ class AuthController {
         } else {
           isUpdated = false;
           status_code = 422;
-          message = "Invalid number";
+          message = 'Invalid number';
         }
       }
       if (isUpdated) {
@@ -446,7 +444,7 @@ class AuthController {
         res
           .status(200)
           .json(
-            ApiModel.getApiModel(Enum.status.SUCCESS, "Updated successfully")
+            ApiModel.getApiModel(Enum.status.SUCCESS, 'Updated successfully')
           );
       } else {
         res
@@ -490,7 +488,7 @@ class AuthController {
                 .json(
                   ApiModel.getApiModel(
                     Enum.status.FAILED,
-                    "New password and old password cannot be same"
+                    'New password and old password cannot be same'
                   )
                 );
             } else {
@@ -507,7 +505,7 @@ class AuthController {
                 .json(
                   ApiModel.getApiModel(
                     Enum.status.SUCCESS,
-                    "Password changed successfully"
+                    'Password changed successfully'
                   )
                 );
             }
@@ -516,7 +514,7 @@ class AuthController {
             res
               .status(500)
               .json(
-                ApiModel.getApiModel(Enum.status.ERROR, "Something went wrong")
+                ApiModel.getApiModel(Enum.status.ERROR, 'Something went wrong')
               );
           }
         }
@@ -525,7 +523,7 @@ class AuthController {
       res
         .status(401)
         .json(
-          ApiModel.getApiModel(Enum.status.FAILED, "All fields are required")
+          ApiModel.getApiModel(Enum.status.FAILED, 'All fields are required')
         );
     }
   };
@@ -535,14 +533,14 @@ class AuthController {
       if (!email) {
         res
           .status(401)
-          .json(ApiModel.getApiModel(Enum.status.FAILED, "Email is required"));
+          .json(ApiModel.getApiModel(Enum.status.FAILED, 'Email is required'));
       } else if (!Utils.ValidateEmail(email)) {
         res
           .status(422)
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "You have entered an invalid email address!"
+              'You have entered an invalid email address!'
             )
           );
       } else {
@@ -568,7 +566,7 @@ class AuthController {
       res
         .status(401)
         .json(
-          ApiModel.getApiModel(Enum.status.FAILED, "All field is required")
+          ApiModel.getApiModel(Enum.status.FAILED, 'All field is required')
         );
     } else {
       try {
@@ -586,7 +584,7 @@ class AuthController {
         res
           .status(500)
           .json(
-            ApiModel.getApiModel(Enum.status.FAILED, "Something went wrong!!!")
+            ApiModel.getApiModel(Enum.status.FAILED, 'Something went wrong!!!')
           );
       }
     }
