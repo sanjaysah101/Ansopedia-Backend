@@ -1,19 +1,19 @@
-const { Mail } = require("./Mail");
-const { OTP } = require("./Otp");
-const { JWT } = require("./JWT");
-const { Notify } = require("./Notify");
+const { Mail } = require('./Mail');
+const { OTP } = require('./Otp');
+const { JWT } = require('./JWT');
+const { Notify } = require('./Notify');
 
-const { UserModel } = require("../models/User");
-const ApiModel = require("../models/ApiModel").default;
-const Enum = require("./Enum");
+const { UserModel } = require('../models/User');
+const ApiModel = require('../models/ApiModel').default;
+const Enum = require('./Enum');
 class Helper {
   static Registration = async (email) => {
     try {
       // console.log(email)
       const user = await UserModel.findOne({ email });
-      const token = await JWT.generateToken(user, "365d", 31536000);
-      const link = `https://api.ansopedia.com/user/verify/${user._id}/${token}`;
-      // console.log(link);
+      const token = await JWT.generateToken(user, '365d', 31536000);
+      const link = `${process.env.EMAIL_VERIFICATION_LINK}/${user._id}/${token}`;
+      // console.log(link);https://api.ansopedia.com/user/verify
       let otp = OTP.generateOTP();
       await OTP.saveOTP(user, otp);
       // console.log(user);
@@ -43,13 +43,13 @@ class Helper {
           res
             .status(403)
             .json(
-              ApiModel.getApiModel(Enum.status.FORBIDDEN, "session expire")
+              ApiModel.getApiModel(Enum.status.FORBIDDEN, 'session expire')
             );
         }
       } else {
         res
           .status(401)
-          .json(ApiModel.getApiModel(Enum.status.FAILED, "link expired"));
+          .json(ApiModel.getApiModel(Enum.status.FAILED, 'link expired'));
       }
       return false;
     } catch (err) {
@@ -66,7 +66,7 @@ class Helper {
   };
   static Login = async (user) => {
     try {
-      const token = await JWT.generateLoginToken(user, "1d", 86400);
+      const token = await JWT.generateLoginToken(user, '1d', 86400);
       return token;
     } catch (err) {
       if (err) throw new Error(`${err} at Helper.Login`);
@@ -88,7 +88,7 @@ class Helper {
         res.json(
           ApiModel.getApiModel(
             Enum.status.SUCCESS,
-            "Password Reset Email Sent... Please Check Your Email"
+            'Password Reset Email Sent... Please Check Your Email'
           )
         );
       } else {
@@ -109,7 +109,7 @@ class Helper {
         otp
       );
       if (isVerified) {
-        const token = await JWT.generateTokenWithoutUser(user, "15m", 900);
+        const token = await JWT.generateTokenWithoutUser(user, '15m', 900);
         res
           .status(status_code)
           .json(ApiModel.getApiModel(Enum.status.SUCCESS, message, { token }));

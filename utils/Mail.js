@@ -6,7 +6,7 @@ const app = express();
 
 const { Config } = require("../config/Config");
 app.use(express.static(path.join(__dirname, "public")));
-const FROM_NOREPLY = process.env.EMAIL_FROM_NOREPLY;
+const FROM_NOREPLY = process.env.EMAIL_FROM_NO_REPLY;
 const FROM_CONTACT = process.env.EMAIL_FROM_CONTACT;
 
 class Mail {

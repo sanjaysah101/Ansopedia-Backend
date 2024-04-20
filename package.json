@@ -37,5 +37,8 @@
     "mongoose": "^6.10.3",
     "nodemailer": "^6.9.1",
     "nodemailer-express-handlebars": "^6.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
   }
 }

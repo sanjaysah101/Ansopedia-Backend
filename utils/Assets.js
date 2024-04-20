@@ -1,24 +1,24 @@
-const path = require("path");
+const path = require('path');
 const MAXSIZE = 1000000;
-const express = require("express");
-const { AssetsModel } = require("../models/Assets");
-const IMAGE_URI = "https://api.ansopedia.com/images/";
-const { unlink, existsSync } = require("fs");
-const ApiModel = require("../models/ApiModel").default;
-const Enum = require("./Enum");
+const express = require('express');
+const { AssetsModel } = require('../models/Assets');
+const IMAGE_URI = 'https://api.ansopedia.com/images/';
+const { unlink, existsSync } = require('fs');
+const ApiModel = require('../models/ApiModel').default;
+const Enum = require('./Enum');
 
 const checkExtension = (file) => {
   const extension = path.extname(file.name).toLowerCase();
   const mimetype = file.mimetype;
   if (
-    extension === ".png" ||
-    extension === ".jpg" ||
-    extension === ".jpeg" ||
-    extension === ".svg" ||
-    mimetype === "image/png" ||
-    mimetype === "image/jpg" ||
-    mimetype === "image/svg" ||
-    mimetype === "image/jpeg"
+    extension === '.png' ||
+    extension === '.jpg' ||
+    extension === '.jpeg' ||
+    extension === '.svg' ||
+    mimetype === 'image/png' ||
+    mimetype === 'image/jpg' ||
+    mimetype === 'image/svg' ||
+    mimetype === 'image/jpeg'
   ) {
     return true;
   } else {
@@ -29,6 +29,7 @@ const checkExtension = (file) => {
 class Assets {
   static profileUpload = (req, res, next) => {
     const file = req.files;
+    console.log({ file });
     if (file) {
       if (!file.avatar) {
         res
@@ -36,7 +37,7 @@ class Assets {
           .json(
             ApiModel.getApiModel(
               Enum.status.FAILED,
-              "Field name must be avatar"
+              'Field name must be avatar'
             )
           );
       } else {
@@ -46,16 +47,16 @@ class Assets {
             .json(
               ApiModel.getApiModel(
                 Enum.status.FAILED,
-                "Invalid Extension!!! Only .png, .jpg, .jpeg and .svg format is required"
+                'Invalid Extension!!! Only .png, .jpg, .jpeg and .svg format is required'
               )
             );
         } else {
           if (file.avatar.size < MAXSIZE) {
-            let filename = `${req.user.email.split("@")[0]}-${Date.now()}-${
+            let filename = `${req.user.email.split('@')[0]}-${Date.now()}-${
               file.avatar.name
             }`;
             // path.join(__dirname, "..", "logs")
-            const fileToUpload = path.join(__dirname, "..", "assets", "avatar");
+            const fileToUpload = path.join(__dirname, '..', 'assets', 'avatar');
             const LOC = path.join(fileToUpload, filename);
             req.filePath = filename;
             if (req.user?.avatar?.picture) {
@@ -72,7 +73,7 @@ class Assets {
                       .json(
                         ApiModel.getApiModel(
                           Enum.status.FAILED,
-                          "Something went wrong"
+                          'Something went wrong'
                         )
                       );
                 });
@@ -84,7 +85,7 @@ class Assets {
                     .json(
                       ApiModel.getApiModel(
                         Enum.status.FAILED,
-                        "Something went wrong"
+                        'Something went wrong'
                       )
                     );
                 } else {
@@ -101,7 +102,7 @@ class Assets {
                     .json(
                       ApiModel.getApiModel(
                         Enum.status.FAILED,
-                        "Something went wrong"
+                        'Something went wrong'
                       )
                     );
                 } else {
@@ -118,7 +119,7 @@ class Assets {
               .json(
                 ApiModel.getApiModel(
                   Enum.status.FAILED,
-                  "Avatar size is too large",
+                  'Avatar size is too large',
                   { maxSize: MAXSIZE }
                 )
               );
@@ -129,7 +130,7 @@ class Assets {
     } else {
       res
         .status(404)
-        .json(ApiModel.getApiModel(Enum.status.FAILED, "Image is missing"));
+        .json(ApiModel.getApiModel(Enum.status.FAILED, 'Image is missing'));
     }
   };
 
@@ -141,7 +142,7 @@ class Assets {
         res
           .status(400)
           .json(
-            ApiModel.getApiModel(Enum.status.FAILED, "Field name must be image")
+            ApiModel.getApiModel(Enum.status.FAILED, 'Field name must be image')
           );
       } else {
         if (!checkExtension(file.image)) {
@@ -150,7 +151,7 @@ class Assets {
             .json(
               ApiModel.getApiModel(
                 Enum.status.FAILED,
-                "Invalid Extension!!! Only .png, .jpg, .jpeg format is required"
+                'Invalid Extension!!! Only .png, .jpg, .jpeg format is required'
               )
             );
         } else {
@@ -160,9 +161,9 @@ class Assets {
             console.log(filename);
             const LOC = path.join(
               __dirname,
-              "..",
-              "assets",
-              "images",
+              '..',
+              'assets',
+              'images',
               filename
             );
             file.image.mv(`${LOC}`, async (err) => {
@@ -172,7 +173,7 @@ class Assets {
                   .json(
                     ApiModel.getApiModel(
                       Enum.status.FAILED,
-                      "Something went wrong"
+                      'Something went wrong'
                     )
                   );
               } else {
@@ -194,7 +195,7 @@ class Assets {
               .json(
                 ApiModel.getApiModel(
                   Enum.status.FAILED,
-                  "Image size is too large",
+                  'Image size is too large',
                   { maxSize: MAXSIZE }
                 )
               );
@@ -205,7 +206,7 @@ class Assets {
     } else {
       res
         .status(404)
-        .json(ApiModel.getApiModel(Enum.status.FAILED, "Image is missing"));
+        .json(ApiModel.getApiModel(Enum.status.FAILED, 'Image is missing'));
     }
   };
 
@@ -213,18 +214,18 @@ class Assets {
     // console.log(req.user.avatar.picture)
     let filename = req.user?.avatar?.picture;
     if (filename) {
-      const LOC = path.join("assets", "avatar", filename);
+      const LOC = path.join('assets', 'avatar', filename);
       res.download(LOC, function (error) {
         if (error)
           res
             .status(404)
-            .json(ApiModel.getApiModel(Enum.status.FAILED, "Image not found"));
+            .json(ApiModel.getApiModel(Enum.status.FAILED, 'Image not found'));
       });
     } else {
-      console.log(filename);
+      console.log({ filename });
       res
         .status(404)
-        .json(ApiModel.getApiModel(Enum.status.FAILED, "Image not found"));
+        .json(ApiModel.getApiModel(Enum.status.FAILED, 'Image not found'));
     }
   };
   // static getAvatar = (req, res) => {
@@ -249,23 +250,23 @@ class Assets {
     // res.send(imageURI)
     // let filename = req.user.avatar;
     if (imageURI) {
-      const LOC = path.join("assets", "avatar", imageURI);
+      const LOC = path.join('assets', 'avatar', imageURI);
       res.download(LOC, (error) => {
         if (error) {
-          const NEW_LOC = path.join("assets", "images", imageURI);
+          const NEW_LOC = path.join('assets', 'images', imageURI);
           res.download(NEW_LOC, function (err) {
             if (err) {
               res
                 .status(404)
                 .json(
-                  ApiModel.getApiModel(Enum.status.FAILED, "Image not found")
+                  ApiModel.getApiModel(Enum.status.FAILED, 'Image not found')
                 );
             }
           });
         }
       });
     } else {
-      const imageList = await AssetsModel.find().select(["-_id", "title"]);
+      const imageList = await AssetsModel.find().select(['-_id', 'title']);
       if (imageList.length > 0) {
         const newImageList = [];
         for (let i of imageList) {
@@ -273,7 +274,7 @@ class Assets {
           // console.log(i.title)
         }
         res.json(
-          ApiModel.getApiModel(Enum.status.SUCCESS, "Image found", {
+          ApiModel.getApiModel(Enum.status.SUCCESS, 'Image found', {
             totalImage: imageList.length,
             images: newImageList,
           })
@@ -281,7 +282,7 @@ class Assets {
       } else {
         res
           .status(404)
-          .json(ApiModel.getApiModel(Enum.status.FAILED, "Nothing to show"));
+          .json(ApiModel.getApiModel(Enum.status.FAILED, 'Nothing to show'));
       }
     }
   };
