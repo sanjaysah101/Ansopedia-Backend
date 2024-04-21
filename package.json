@@ -2,11 +2,11 @@
   "name": "ansopedia",
   "version": "1.0.0",
   "description": "Backend of ansopedia",
-  "main": "index.js",
+  "main": "./api/index.js",
   "scripts": {
-    "start": "node app",
-    "dev": "nodemon app",
-    "debug": "nodemon --inspect app.js"
+    "start": "node ./api/index.js",
+    "dev": "nodemon",
+    "debug": "nodemon --inspect ./api/index.js"
   },
   "repository": {
     "type": "git",
