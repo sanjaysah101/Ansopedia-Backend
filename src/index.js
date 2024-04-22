@@ -53,8 +53,6 @@ app.use('/api/user', require('./routes/AuthRoute'));
 app.use('/', require('./routes/NonApiRoute'));
 app.get('/health', (req, res) => res.send('Server is up and running!'));
 
-console.log('first');
-
 // Handling non matching request from the client
 app.all('*', (req, res) => {
   res.status(404);

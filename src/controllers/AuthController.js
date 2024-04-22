@@ -15,7 +15,6 @@ const {
   fetchSignInMethodsForEmail,
 } = require('firebase/auth');
 const { FirebaseAdminApp } = require('../config/Firebase-admin');
-const { async } = require('@firebase/util');
 const ApiModel = require('../models/ApiModel');
 const Enum = require('../utils/Enum');
 const { credentials } = require('../config/firebase-adminsdk.js');
