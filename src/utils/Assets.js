@@ -4,7 +4,7 @@ const express = require('express');
 const { AssetsModel } = require('../models/Assets');
 const IMAGE_URI = 'https://api.ansopedia.com/images/';
 const { unlink, existsSync } = require('fs');
-const ApiModel = require('../models/ApiModel').default;
+const ApiModel = require('../models/ApiModel');
 const Enum = require('./Enum');
 
 const checkExtension = (file) => {

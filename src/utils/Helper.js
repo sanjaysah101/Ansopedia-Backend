@@ -4,7 +4,7 @@ const { JWT } = require('./JWT');
 const { Notify } = require('./Notify');
 
 const { UserModel } = require('../models/User');
-const ApiModel = require('../models/ApiModel').default;
+const ApiModel = require('../models/ApiModel');
 const Enum = require('./Enum');
 class Helper {
   static Registration = async (email) => {
@@ -12,7 +12,7 @@ class Helper {
       // console.log(email)
       const user = await UserModel.findOne({ email });
       const token = await JWT.generateToken(user, '365d', 31536000);
-      const link = `${process.env.EMAIL_VERIFICATION_LINK}/${user._id}/${token}`;
+      const link = `${process.env.EMAIL_VERIFICATION_LINK}/api/user/verify/${user._id}/${token}`;
       // console.log(link);https://api.ansopedia.com/user/verify
       let otp = OTP.generateOTP();
       await OTP.saveOTP(user, otp);

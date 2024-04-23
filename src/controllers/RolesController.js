@@ -1,7 +1,7 @@
-const { RoleModel } = require("../models/Roles");
-const { Logs } = require("../middlewares/Logs");
-const ApiModel = require("../models/ApiModel").default;
-const Enum = require("../utils/Enum");
+const { RoleModel } = require('../models/Roles');
+const { Logs } = require('../middlewares/Logs');
+const ApiModel = require('../models/ApiModel');
+const Enum = require('../utils/Enum');
 
 class RoleController {
   static createRole = async (req, res) => {
@@ -14,7 +14,7 @@ class RoleController {
         const isRoleExist = await RoleModel.findOne({ title });
         if (isRoleExist) {
           statusCode = 403;
-          message = "Role already exists";
+          message = 'Role already exists';
         } else {
           const newRole = new RoleModel({ title, description });
           await newRole.save();
@@ -23,11 +23,11 @@ class RoleController {
       } catch (error) {
         Logs.errorHandler(error, req, res);
         statusCode = 500;
-        message = "something went wrong";
+        message = 'something went wrong';
       }
     } else {
       statusCode = 401;
-      message = "All fields are required";
+      message = 'All fields are required';
     }
     if (!isRoleCreated)
       res
@@ -36,7 +36,7 @@ class RoleController {
     else {
       res
         .status(201)
-        .json(ApiModel.getApiModel(Enum.status.SUCCESS, "created"));
+        .json(ApiModel.getApiModel(Enum.status.SUCCESS, 'created'));
     }
   };
 }

@@ -1,4 +1,4 @@
-const ApiModel = require("../models/ApiModel").default;
+const ApiModel = require('../models/ApiModel');
 
 const canSendNotification = (req, res, next) => {
   const roles = req.user.roles;
@@ -6,7 +6,7 @@ const canSendNotification = (req, res, next) => {
   let canSend = false;
   roles.forEach((role) => {
     titleList.push(role.title);
-    if (role.title === "superadmin") {
+    if (role.title === 'superadmin') {
       canSend = true;
     }
   });

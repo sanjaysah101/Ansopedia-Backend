@@ -1,14 +1,14 @@
-const { NotificationModel } = require("../models/Notification");
-const { Logs } = require("../middlewares/Logs");
-const { UserModel } = require("../models/User");
-const ApiModel = require("../models/ApiModel").default;
-const Enum = require("../utils/Enum");
+const { NotificationModel } = require('../models/Notification');
+const { Logs } = require('../middlewares/Logs');
+const { UserModel } = require('../models/User');
+const ApiModel = require('../models/ApiModel');
+const Enum = require('../utils/Enum');
 
 class NotificationController {
   static createNotification = async (req, res) => {
     try {
       const { title, message, time } = req.body;
-      const scope = "global";
+      const scope = 'global';
       if (title && message) {
         const notification = new NotificationModel({
           title,
@@ -22,7 +22,7 @@ class NotificationController {
         res
           .status(401)
           .json(
-            ApiModel.getApiModel(Enum.status.FAILED, "All fields are required")
+            ApiModel.getApiModel(Enum.status.FAILED, 'All fields are required')
           );
       }
     } catch (err) {
@@ -33,21 +33,21 @@ class NotificationController {
   static getNotification = async (req, res) => {
     try {
       const notifications = await NotificationModel.find().select([
-        "_id",
-        "title",
-        "message",
-        "time",
-        "scope",
+        '_id',
+        'title',
+        'message',
+        'time',
+        'scope',
       ]);
       let GlobalNotifications = notifications.filter(
-        (f) => f.scope === "global"
+        (f) => f.scope === 'global'
       );
       const user = await UserModel.findOne({ uid: req.firebaseUser.uid });
       const userNotification = await UserModel.findById(user._id)
-        .select("notifications")
+        .select('notifications')
         .populate({
-          path: "notifications",
-          select: ["_id", "title", "message", "time"],
+          path: 'notifications',
+          select: ['_id', 'title', 'message', 'time'],
         });
       const notify = [
         ...userNotification.notifications,
@@ -59,7 +59,7 @@ class NotificationController {
           .json(
             ApiModel.getApiModel(
               Enum.status.SUCCESS,
-              "Here is notification",
+              'Here is notification',
               notify.reverse()
             )
           );
@@ -67,7 +67,7 @@ class NotificationController {
         res
           .status(404)
           .json(
-            ApiModel.getApiModel(Enum.status.FAILED, "There is nothing to show")
+            ApiModel.getApiModel(Enum.status.FAILED, 'There is nothing to show')
           );
       }
     } catch (err) {

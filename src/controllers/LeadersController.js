@@ -1,5 +1,5 @@
 const { Logs } = require("../middlewares/Logs");
-const ApiModel = require("../models/ApiModel").default;
+const ApiModel = require("../models/ApiModel");
 const { UserModel } = require("../models/User");
 const Enum = require("../utils/Enum");
 const IMAGE_URI = "https://api.ansopedia.com/images/";

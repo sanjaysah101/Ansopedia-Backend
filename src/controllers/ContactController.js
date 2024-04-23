@@ -1,7 +1,7 @@
 const { ContactModel } = require("../models/Contact");
 const { Mail } = require("../utils/Mail");
 const { Logs } = require("../middlewares/Logs");
-const ApiModel = require("../models/ApiModel").default;
+const ApiModel = require("../models/ApiModel");
 const Enum = require("../utils/Enum");
 
 class ContactController {
