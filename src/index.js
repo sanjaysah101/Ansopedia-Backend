@@ -25,9 +25,8 @@ app.use(compression());
 
 // To use HBS
 app.set('view engine', 'hbs');
-app.use(express.static(path.join(__dirname, 'views')));
 
-//CORS Policy - Enble for every device
+//CORS Policy - Enable for every device
 app.use(cors());
 app.use(cors(Config.corsOptions));
 app.use(whitelist);

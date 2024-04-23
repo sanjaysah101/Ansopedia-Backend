@@ -3,6 +3,7 @@ const { UserModel } = require('../models/User.js');
 const { Logs } = require('../middlewares/Logs.js');
 const ApiModel = require('../models/ApiModel.js');
 const Enum = require('../utils/Enum.js');
+const path = require('path');
 
 class UserController {
   static verifyEmailByToken = async (req, res) => {
@@ -11,16 +12,15 @@ class UserController {
     if (id && token) {
       try {
         const user = await UserModel.findById(id);
-        console.log(user);
         if (user) {
           if (user.isAccountVerified) {
-            res.render('congratulation', {
+            res.render(path.join(__dirname, '../views', 'congratulation'), {
               name: user.name,
               message: 'Your account is already verified',
             });
           } else {
             if (Helper.EmailVerificationByToken(user, token, req, res)) {
-              res.render('congratulation', {
+              res.render(path.join(__dirname, '../views', 'congratulation'), {
                 name: user.name,
                 message: 'Congratulation on Account Verification',
               });
