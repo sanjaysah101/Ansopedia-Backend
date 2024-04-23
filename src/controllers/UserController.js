@@ -14,17 +14,21 @@ class UserController {
         const user = await UserModel.findById(id);
         if (user) {
           if (user.isAccountVerified) {
-            res.render(path.join(__dirname, '../views', 'congratulation'), {
-              name: user.name,
-              message: 'Your account is already verified',
-            });
-          } else {
-            if (Helper.EmailVerificationByToken(user, token, req, res)) {
-              res.render(path.join(__dirname, '../views', 'congratulation'), {
+            return res.render(
+              path.join(__dirname, '../views/congratulation.hbs'),
+              {
+                name: user.name,
+                message: 'Your account is already verified',
+              }
+            );
+          } else if (Helper.EmailVerificationByToken(user, token, req, res)) {
+            return res.render(
+              path.join(__dirname, '../views/congratulation.hbs'),
+              {
                 name: user.name,
                 message: 'Congratulation on Account Verification',
-              });
-            }
+              }
+            );
           }
         } else {
           res

@@ -46,10 +46,10 @@ const sendMail = async (from, to, subject, template, context) => {
     // point to the template folder
     const handlebarOptions = {
       viewEngine: {
-        partialsDir: path.join(__dirname, 'views', 'email'),
+        partialsDir: path.join(__dirname, '../views', 'email'),
         defaultLayout: false,
       },
-      viewPath: path.join(__dirname, 'views', 'email'),
+      viewPath: path.join(__dirname, '../views', 'email'),
     };
     // use a template file with nodemailer
     transporter.use('compile', hbs(handlebarOptions));
