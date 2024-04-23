@@ -50,7 +50,7 @@ app.use('/api/leaders', require('./routes/leadersRouter'));
 app.use('/api/user', require('./routes/AuthRoute'));
 
 // Non Api Routes
-app.use('/', require('./routes/NonApiRoute'));
+app.use('/api', require('./routes/NonApiRoute'));
 app.get('/health', (req, res) => res.send('Server is up and running!'));
 
 // Handling non matching request from the client
